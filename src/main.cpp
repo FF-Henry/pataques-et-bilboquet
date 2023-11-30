@@ -5,7 +5,7 @@ constexpr auto SCREEN_HEIGHT = 900;
 
 int main()
 {
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pataquès et bilboquet");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pataprout et bilboquet");
     SetTargetFPS(30);
 
     Texture2D texture = LoadTexture(ASSETS_PATH"test.png");
