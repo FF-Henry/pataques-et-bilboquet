@@ -29,7 +29,7 @@ int main()
         if(sub_x <= 0 && !direction){
             direction = true;
             speed = 0;
-        }
+        } 
         if(sub_x >= SCREEN_WIDTH-sub_texture.width && direction){
             direction = false;
             speed = 0;
