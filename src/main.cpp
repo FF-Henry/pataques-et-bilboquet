@@ -324,6 +324,9 @@ void start_thread(int index, vector<Station*> metro_line, vector<Subway*> metro_
 int main() {
 	srand((int)time(NULL));
 
+	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pataprout et bilboquet");
+	SetTargetFPS(30);
+
 	Station Depot("Depot", 0, 0, false, false);
 	Station Lille("Lille", 50, 50, false, false);
 	Station Berlin("Berlin", 50, 50, false, false);
@@ -347,17 +350,59 @@ int main() {
 
 	start_thread(0, metro_line, metro_subway, subway_thread);
 
+
+
+
+
+
+	Metropolis.coordinates.x = SCREEN_WIDTH / 2 - Metropolis.sub_texture.width / 2;
+	Metropolis.coordinates.y = SCREEN_HEIGHT / 2 - Metropolis.sub_texture.height / 2;
+
+	bool direction = true;
+	int speed = 0;
+	int max_speed = 20;
+	int acceleration = 1;
+
+	while (!WindowShouldClose())
+	{
+		BeginDrawing();
+		ClearBackground(WHITE);
+
+		if (Metropolis.coordinates.x <= 0 && !direction) {
+			direction = true;
+			speed = 0;
+		}
+
+		if (Metropolis.coordinates.x >= SCREEN_WIDTH - Metropolis.sub_texture.width && direction) {
+			direction = false;
+			speed = 0;
+		}
+
+		speed += acceleration;
+
+		if (speed > max_speed) { speed = max_speed; }
+		Metropolis.coordinates.x += direction ? speed : -speed;
+
+		DrawTextureEx(Metropolis.sub_texture, Metropolis.coordinates, 0, 1, WHITE);
+
+		const char* text = "PATAPROUT";
+		const Vector2 text_size = MeasureTextEx(GetFontDefault(), text, 20, 1);
+		DrawText(text, SCREEN_WIDTH / 2 - text_size.x / 2, 500 + text_size.y + 10, 20, BLACK);
+
+		EndDrawing();
+	}
+
+	CloseWindow();
+
 	for (int i = 0; i < metro_subway.size(); ++i) {
 		subway_thread[i].join();
 	}
 
 	for (int j = 0; j < metro_line.size(); j++) {
-
 		cout << metro_line[j]->get_people_forward() << " : fw || " << metro_line[j]->get_people_return() << " : rtn" << endl;
-
 	}
+
+	UnloadTexture(Metropolis.sub_texture);
 
 	return 0;
 }
-
-

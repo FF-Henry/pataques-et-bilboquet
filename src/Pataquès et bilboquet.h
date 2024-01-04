@@ -28,7 +28,6 @@ private:
 	float acceleration;
 	bool direction = true; // True est le sens croissant (pour l'aller) des stations et false le sens décroissant (pour le retour)
 	int station_id;
-
 	//mutex position_mutex;
 	//condition_variable position_condition;
 
@@ -39,6 +38,9 @@ public:
 	Subway(const int& init_id,const int& init_people,const int& init_max_people,const float& init_speed,const float& init_max_speed,const float& init_acceleration, const bool& init_direction, const int& init_station_id);
 	
 	//Subway operator=(Subway&);
+
+	Texture2D sub_texture = LoadTexture(ASSETS_PATH"sub_asset.png");
+	Vector2 coordinates;
 
 	void set_id(const int& setid);
 	void set_people(const int& setpeople);
