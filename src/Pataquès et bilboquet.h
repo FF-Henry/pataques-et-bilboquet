@@ -28,7 +28,7 @@ private:
 	int acceleration;
 	bool direction = true; // True est le sens croissant (pour l'aller) des stations et false le sens décroissant (pour le retour)
 	int station_id;
-	int safe_distance = 40;
+	int safe_distance = 125;
 	
 	//mutex position_mutex;
 	//condition_variable position_condition;
