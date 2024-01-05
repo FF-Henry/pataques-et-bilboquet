@@ -140,6 +140,16 @@ void Subway::move_to_station(Vector2 target_position, Subway& previous_subway){
 
 			}
 		}
+
+		if (target_position.x == 1500 && coordinates.x == 1500) {
+			coordinates.y = 600;
+
+		}
+		if (target_position.x == 100 && coordinates.x == 100) {
+			coordinates.y = 400;
+
+		}
+
 		coordinates.x += direction_indicator * static_cast<int>(this->get_speed());
 	}
 	this->set_speed(0);
@@ -263,11 +273,11 @@ void Station::people_offboarding(Subway subway_in) {
 		}
 		if (subway_in.get_direction()) { 
 			sub_in_station_forward.set_people(people_in_subway - off); 
-			this->set_people_forward(this->get_people_forward() + off); // boucle de passager fermée, à commenter pour demande initiale
+			// this->set_people_forward(this->get_people_forward() + off); // boucle de passager fermée, à commenter pour demande initiale
 		}
 		else { 
 			sub_in_station_return.set_people(people_in_subway - off);
-			this->set_people_return(this->get_people_return() + off); // boucle de passager fermée, à commenter pour demande initiale
+			// this->set_people_return(this->get_people_return() + off); // boucle de passager fermée, à commenter pour demande initiale
 		}
 		//cout << sub_in_station.get_people() << " people now in subway" << endl << endl;
 
@@ -313,12 +323,6 @@ void core_gameplay(vector<Station*> metro_line, vector<Subway*> metro_subway, in
 				index += down_factor;
 				down_factor -= 2;
 			}
-			/* {
-				std::unique_lock<std::mutex> lock(metro_subway[sub_index]->position_mutex);
-				metro_subway[sub_index]->position_condition.wait(lock, [index, metro_subway, sub_index] {
-					return index - 1 >= 0 && metro_subway[index - 1]->get_position() > SOME_THRESHOLD;
-					});
-			}*/ //a tester 
 
 			if (!start && (index == 0 || index == metro_line.size() - 1)) {
 
@@ -425,6 +429,10 @@ int main() {
 			DrawTextureEx(metro_line[i]->station_texture, { metro_line[i]->station_location.x - ceil((float)metro_line[i]->station_texture.width / (float)2), 300 }, 0, 1, WHITE);
 		}
 
+		for (int i = 0; i < metro_line.size(); i++) {
+			DrawTextureEx(metro_line[i]->station_texture, { metro_line[i]->station_location.x - ceil((float)metro_line[i]->station_texture.width / (float)2), 500 }, 0, 1, WHITE);
+		}
+
 		// DRAWING SUBWAY
 		for (int i = 0; i < metro_subway_active.size(); ++i) {
 			DrawTextureEx(metro_subway_active[i]->sub_texture, { metro_subway_active[i]->coordinates.x - ceil((float)metro_subway_active[i]->sub_texture.width / (float)2), metro_subway_active[i]->coordinates.y }, 0, 1, WHITE);
@@ -454,8 +462,6 @@ int main() {
 
 	return 0;
 }
-
-
 
 
 /*const char* text = "PATAPROUT";d
