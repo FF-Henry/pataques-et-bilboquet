@@ -28,6 +28,7 @@ private:
 	float acceleration;
 	bool direction = true; // True est le sens croissant (pour l'aller) des stations et false le sens décroissant (pour le retour)
 	int station_id;
+	
 	//mutex position_mutex;
 	//condition_variable position_condition;
 
@@ -39,8 +40,8 @@ public:
 	
 	//Subway operator=(Subway&);
 
-	Texture2D sub_texture = LoadTexture(ASSETS_PATH"sub_asset.png");
 	Vector2 coordinates;
+	Texture2D sub_texture = LoadTexture(ASSETS_PATH"sub_asset.png");
 
 	void set_id(const int& setid);
 	void set_people(const int& setpeople);
@@ -52,7 +53,6 @@ public:
 	void set_station_id(const int& id);
 
 
-
 	int get_id();
 	int get_people();
 	int get_maxpeople();
@@ -60,7 +60,10 @@ public:
 	float get_acceleration();
 	float get_max_speed();
 	bool get_direction();
-	int get_station_id();	
+	int get_station_id();
+
+
+	void move_to_station(Vector2 target_position);
 };
 
 
@@ -76,7 +79,10 @@ private:
 	Subway sub_in_station_return;
 
 public:
-	Station(const string& init_name, const int& init_people_forward, const int& init_people_return, const bool& init_is_subway, const bool& init_is_ready);
+
+	Vector2 station_location;
+
+	Station(const string& init_name, const int& init_people_forward, const int& init_people_return, const bool& init_is_subway, const bool& init_is_ready, const Vector2& init_station_location);
 	void set_name(const char& setname);
 	void set_id(const int& setid);
 	void set_people_forward(const int& setpeopleforward);

@@ -105,14 +105,41 @@ int Subway::get_station_id() {
 	return station_id;
 }
 
+void Subway::move_to_station(Vector2 target_position){
+
+	int distance = static_cast<int>(target_position.x) - static_cast<int>(this->coordinates.x);
+	
+	while (abs(distance) > 0) {
+
+		this_thread::sleep_for(10ms);
+
+		distance = static_cast<int>(target_position.x) - static_cast<int>(this->coordinates.x);
+		int direction = (distance > 0) ? 1 : -1;
+
+		if (abs(distance) < this->get_speed()) {
+			this->set_speed(this->get_speed() - this->get_acceleration());
+		}
+		else {
+			this->set_speed(this->get_speed() + this->get_acceleration());
+			if (this->get_speed() > this->get_max_speed()) {
+				this->set_speed(this->get_max_speed());
+			}
+
+		}
+		coordinates.x += direction * static_cast<int>(this->get_speed());
+	}
+	this->set_speed(0);
+}
+
 // station //
 
-Station::Station(const string& init_name, const int& init_people_forward, const int& init_people_return, const bool& init_is_subway, const bool& init_is_ready) {
+Station::Station(const string& init_name, const int& init_people_forward, const int& init_people_return, const bool& init_is_subway, const bool& init_is_ready, const Vector2& init_station_location) {
 	name = init_name;
 	people_forward = init_people_forward;
 	people_return = init_people_return;
 	is_subway = init_is_subway;
 	is_ready = init_is_ready;
+	station_location = init_station_location;
 }
 
 void Station::set_name(const char& setname) {
@@ -273,8 +300,6 @@ void subway_move(vector<Station*> metro_line, vector<Subway*> metro_subway, int 
 	int down_factor = -2; // pour reset l'aller retour
 	for (int j = 0; j < nb_fois; j++) {
 
-
-
 		for (int i = 0; i <= (metro_line.size() * 2) - 2; i++) {
 			int index = i;
 			if (i > metro_line.size() - 1) {
@@ -289,6 +314,7 @@ void subway_move(vector<Station*> metro_line, vector<Subway*> metro_subway, int 
 			}*/ //a tester 
 
 			if (!start && (index == 0 || index == metro_line.size() - 1)) {
+				metro_subway[sub_index]->move_to_station(metro_line[index]->station_location);
 				cout << metro_subway[sub_index]->get_id() << " in depot " << index << "\n";
 				metro_subway[sub_index]->reverse_direction();
 				start = true;
@@ -296,12 +322,13 @@ void subway_move(vector<Station*> metro_line, vector<Subway*> metro_subway, int 
 			else if (index != 0 && index != metro_line.size() - 1) {
 				if (start) start = false;
 
+				metro_subway[sub_index]->move_to_station(metro_line[index]->station_location);
 				metro_line[index]->subway_entrance(*metro_subway[sub_index]);
 				*metro_subway[sub_index] = metro_line[index]->subway_exit(*metro_subway[sub_index]);
 				cout << "===============================================" << endl << endl;
 			}
 			if (i != 0 && i % ratio == 0 && next_id < metro_subway.size()) { // si la distance entre les lignes est bonne + on evite les out of range
-				cout << "encore ((((((((((((((((((((((((((((((((((((((((((((((((((((" << endl;
+				cout << "encore ((((((((((((((((((((((((((((((((((((((((((((" << endl;
 				start_thread(next_id, metro_line, metro_subway, subway_thread);
 				next_id = 999;
 			}
@@ -325,21 +352,24 @@ int main() {
 	srand((int)time(NULL));
 
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pataprout et bilboquet");
-	SetTargetFPS(30);
+	SetTargetFPS(20);
 
-	Station Depot("Depot", 0, 0, false, false);
-	Station Lille("Lille", 50, 50, false, false);
-	Station Berlin("Berlin", 50, 50, false, false);
-	Station Moscou("Moscou", 50, 50, false, false);
-	Station Madrid("Madrid", 50, 50, false, false);
+	Station Depot1("Depot1", 0, 0, false, false, {100, 400});
+	Station Depot2("Depot2", 0, 0, false, false, {1500, 400});
+	Station Lille("Lille", 50, 50, false, false, {200, 400});
+	Station Berlin("Berlin", 50, 50, false, false, {400, 400});
+	Station Moscou("Moscou", 50, 50, false, false, {1000, 400});
+	Station Madrid("Madrid", 50, 50, false, false, {1200, 400});
 
-	Subway Metropolis(1, 10, 40, 0, 1, 1, true, 0);
-	Subway Metropompied(2, 10, 40, 0, 1, 1, true, 0);
-	Subway Metronome(3, 10, 40, 0, 1, 1, true, 0);
-	Subway Metrambulance(4, 10, 40, 0, 1, 1, true, 0);
+	Subway Metropolis(1, 10, 40, 0, 3, 1, true, 0);
+	Subway Metropompied(2, 10, 40, 0, 3, 1, true, 0);
+	Subway Metronome(3, 10, 40, 0, 10, 3, true, 0);
+	Subway Metrambulance(4, 10, 40, 0, 3, 1, true, 0);
 
-	vector<Station*> metro_line = { &Depot, &Lille , &Berlin, &Moscou, &Madrid, &Depot };
 
+	Metropolis.coordinates = {100, 400};
+
+	vector<Station*> metro_line = { &Depot1, &Lille , &Berlin, &Moscou, &Madrid, &Depot2 };
 	vector<Subway*> metro_subway = { &Metropolis };//, & Metropompied};//, &Metronome, &Metrambulance };
 
 	jthread subway_thread[1];
@@ -349,14 +379,6 @@ int main() {
 	}
 
 	start_thread(0, metro_line, metro_subway, subway_thread);
-
-
-
-
-
-
-	Metropolis.coordinates.x = SCREEN_WIDTH / 2 - Metropolis.sub_texture.width / 2;
-	Metropolis.coordinates.y = SCREEN_HEIGHT / 2 - Metropolis.sub_texture.height / 2;
 
 	bool direction = true;
 	int speed = 0;
@@ -368,26 +390,11 @@ int main() {
 		BeginDrawing();
 		ClearBackground(WHITE);
 
-		if (Metropolis.coordinates.x <= 0 && !direction) {
-			direction = true;
-			speed = 0;
-		}
-
-		if (Metropolis.coordinates.x >= SCREEN_WIDTH - Metropolis.sub_texture.width && direction) {
-			direction = false;
-			speed = 0;
-		}
-
-		speed += acceleration;
-
-		if (speed > max_speed) { speed = max_speed; }
-		Metropolis.coordinates.x += direction ? speed : -speed;
-
 		DrawTextureEx(Metropolis.sub_texture, Metropolis.coordinates, 0, 1, WHITE);
 
-		const char* text = "PATAPROUT";
+		/*const char* text = "PATAPROUT";
 		const Vector2 text_size = MeasureTextEx(GetFontDefault(), text, 20, 1);
-		DrawText(text, SCREEN_WIDTH / 2 - text_size.x / 2, 500 + text_size.y + 10, 20, BLACK);
+		DrawText(text, SCREEN_WIDTH / 2 - text_size.x / 2, 500 + text_size.y + 10, 20, BLACK);*/
 
 		EndDrawing();
 	}
