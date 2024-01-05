@@ -41,7 +41,7 @@ public:
 	//Subway operator=(Subway&);
 
 	Vector2 coordinates;
-	Texture2D sub_texture = LoadTexture(ASSETS_PATH"sub_asset.png");
+	Texture2D sub_texture;
 
 	void set_id(const int& setid);
 	void set_people(const int& setpeople);
@@ -81,6 +81,7 @@ private:
 public:
 
 	Vector2 station_location;
+	Texture2D station_texture;
 
 	Station(const string& init_name, const int& init_people_forward, const int& init_people_return, const bool& init_is_subway, const bool& init_is_ready, const Vector2& init_station_location);
 	void set_name(const char& setname);

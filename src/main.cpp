@@ -354,8 +354,6 @@ int main() {
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pataprout et bilboquet");
 	SetTargetFPS(20);
 
-	Texture2D station_texture = LoadTexture(ASSETS_PATH"station_asset.png");
-
 	Station Depot1("Depot1", 0, 0, false, false, { 100, 400 });
 	Station Lille("Lille", 50, 50, false, false, { 300, 400 });
 	Station Berlin("Berlin", 50, 50, false, false, { 500, 400 });
@@ -368,16 +366,29 @@ int main() {
 	Subway Metronome(3, 10, 40, 0, 10, 3, true, 0);
 	Subway Metrambulance(4, 10, 40, 0, 3, 1, true, 0);
 
-	Metropolis.coordinates = { 100, 400 };
-	Metropompied.coordinates = { 100, 400 };
-
 	vector<Station*> metro_line = { &Depot1, &Lille , &Berlin, &Moscou, &Madrid, &Depot2 };
 	vector<Subway*> metro_subway = { &Metropolis, &Metropompied };//, &Metronome, &Metrambulance };
 
 	jthread subway_thread[2];
 
-	for (int i = 1; i < metro_line.size(); i++) {
+	// STATION ID GIVING
+	for (int i = 1; i < metro_line.size() - 1; i++) {
 		metro_line[i]->set_id(i);
+	}
+
+	// POS AND TEXTURE LOADING
+	Metropolis.coordinates = { 100, 400 };
+	Metropompied.coordinates = { 100, 400 };
+
+	Metropolis.sub_texture = LoadTexture(ASSETS_PATH"sub1_asset.png");
+	Metropompied.sub_texture = LoadTexture(ASSETS_PATH"sub2_asset.png");
+
+	Depot1.station_texture = LoadTexture(ASSETS_PATH"depot_asset.png");
+	Depot2.station_texture = LoadTexture(ASSETS_PATH"depot_asset.png");
+
+	// DEFAULT STATION TEXTURE LOADING
+	for (int i = 1; i < metro_line.size() - 1; i++) {
+		metro_line[i]->station_texture = LoadTexture(ASSETS_PATH"station_asset.png");
 	}
 
 	start_thread(0, metro_line, metro_subway, subway_thread);
@@ -387,15 +398,12 @@ int main() {
 		BeginDrawing();
 		ClearBackground(WHITE);
 
-		//int sub_x = SCREEN_WIDTH / 2 - sub_texture.width / 2;
+		// DRAWING STATION
+		for (int i = 0; i < metro_line.size(); i++) {
+			DrawTextureEx(metro_line[i]->station_texture, { metro_line[i]->station_location.x - ceil((float)metro_line[i]->station_texture.width / (float)2), 300 }, 0, 1, WHITE);
+		}
 
-		DrawTextureEx(station_texture, { 100 - ceil((float)station_texture.width / (float)2), 300 }, 0, 1, WHITE);
-		DrawTextureEx(station_texture, { 300 - ceil((float)station_texture.width / (float)2), 300 }, 0, 1, WHITE);
-		DrawTextureEx(station_texture, { 500 - ceil((float)station_texture.width / (float)2), 300 }, 0, 1, WHITE);
-		DrawTextureEx(station_texture, { 1000 - ceil((float)station_texture.width / (float)2), 300 }, 0, 1, WHITE);
-		DrawTextureEx(station_texture, { 1200 - ceil((float)station_texture.width / (float)2), 300 }, 0, 1, WHITE);
-		DrawTextureEx(station_texture, { 1500 - ceil((float)station_texture.width / (float)2), 300 }, 0, 1, WHITE);
-
+		// DRAWING SUBWAY
 		for (int i = 0; i < metro_subway.size(); ++i) {
 			DrawTextureEx(metro_subway[i]->sub_texture, { metro_subway[i]->coordinates.x - ceil((float)metro_subway[i]->sub_texture.width / (float)2), metro_subway[i]->coordinates.y }, 0, 1, WHITE);
 		}
@@ -417,8 +425,14 @@ int main() {
 		cout << metro_line[j]->get_people_forward() << " : fw || " << metro_line[j]->get_people_return() << " : rtn" << endl;
 	}
 
-	UnloadTexture(Metropolis.sub_texture);
-	UnloadTexture(station_texture);
+	// UNLOADING TEXTURES
+	for (int i = 0; i < metro_line.size(); i++) {
+		UnloadTexture(metro_line[i]->station_texture);
+	}
+	
+	for (int i = 0; i < metro_subway.size(); ++i) {
+		UnloadTexture(metro_subway[i]->sub_texture);
+	}
 
 	return 0;
 }
