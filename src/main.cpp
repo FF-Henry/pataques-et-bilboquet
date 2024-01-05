@@ -354,25 +354,27 @@ int main() {
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pataprout et bilboquet");
 	SetTargetFPS(20);
 
-	Station Depot1("Depot1", 0, 0, false, false, {100, 400});
-	Station Depot2("Depot2", 0, 0, false, false, {1500, 400});
-	Station Lille("Lille", 50, 50, false, false, {200, 400});
-	Station Berlin("Berlin", 50, 50, false, false, {400, 400});
-	Station Moscou("Moscou", 50, 50, false, false, {1000, 400});
-	Station Madrid("Madrid", 50, 50, false, false, {1200, 400});
+	Texture2D station_texture = LoadTexture(ASSETS_PATH"station_asset.png");
+
+	Station Depot1("Depot1", 0, 0, false, false, { 100, 400 });
+	Station Lille("Lille", 50, 50, false, false, { 300, 400 });
+	Station Berlin("Berlin", 50, 50, false, false, { 500, 400 });
+	Station Moscou("Moscou", 50, 50, false, false, { 1000, 400 });
+	Station Madrid("Madrid", 50, 50, false, false, { 1200, 400 });
+	Station Depot2("Depot2", 0, 0, false, false, { 1500, 400 });
 
 	Subway Metropolis(1, 10, 40, 0, 3, 1, true, 0);
 	Subway Metropompied(2, 10, 40, 0, 3, 1, true, 0);
 	Subway Metronome(3, 10, 40, 0, 10, 3, true, 0);
 	Subway Metrambulance(4, 10, 40, 0, 3, 1, true, 0);
 
-
-	Metropolis.coordinates = {100, 400};
+	Metropolis.coordinates = { 100, 400 };
+	Metropompied.coordinates = { 100, 400 };
 
 	vector<Station*> metro_line = { &Depot1, &Lille , &Berlin, &Moscou, &Madrid, &Depot2 };
-	vector<Subway*> metro_subway = { &Metropolis };//, & Metropompied};//, &Metronome, &Metrambulance };
+	vector<Subway*> metro_subway = { &Metropolis, &Metropompied };//, &Metronome, &Metrambulance };
 
-	jthread subway_thread[1];
+	jthread subway_thread[2];
 
 	for (int i = 1; i < metro_line.size(); i++) {
 		metro_line[i]->set_id(i);
@@ -380,19 +382,25 @@ int main() {
 
 	start_thread(0, metro_line, metro_subway, subway_thread);
 
-	bool direction = true;
-	int speed = 0;
-	int max_speed = 20;
-	int acceleration = 1;
-
 	while (!WindowShouldClose())
 	{
 		BeginDrawing();
 		ClearBackground(WHITE);
 
-		DrawTextureEx(Metropolis.sub_texture, Metropolis.coordinates, 0, 1, WHITE);
+		//int sub_x = SCREEN_WIDTH / 2 - sub_texture.width / 2;
 
-		/*const char* text = "PATAPROUT";
+		DrawTextureEx(station_texture, { 100 - ceil((float)station_texture.width / (float)2), 300 }, 0, 1, WHITE);
+		DrawTextureEx(station_texture, { 300 - ceil((float)station_texture.width / (float)2), 300 }, 0, 1, WHITE);
+		DrawTextureEx(station_texture, { 500 - ceil((float)station_texture.width / (float)2), 300 }, 0, 1, WHITE);
+		DrawTextureEx(station_texture, { 1000 - ceil((float)station_texture.width / (float)2), 300 }, 0, 1, WHITE);
+		DrawTextureEx(station_texture, { 1200 - ceil((float)station_texture.width / (float)2), 300 }, 0, 1, WHITE);
+		DrawTextureEx(station_texture, { 1500 - ceil((float)station_texture.width / (float)2), 300 }, 0, 1, WHITE);
+
+		for (int i = 0; i < metro_subway.size(); ++i) {
+			DrawTextureEx(metro_subway[i]->sub_texture, { metro_subway[i]->coordinates.x - ceil((float)metro_subway[i]->sub_texture.width / (float)2), metro_subway[i]->coordinates.y }, 0, 1, WHITE);
+		}
+
+		/*const char* text = "PATAPROUT";d
 		const Vector2 text_size = MeasureTextEx(GetFontDefault(), text, 20, 1);
 		DrawText(text, SCREEN_WIDTH / 2 - text_size.x / 2, 500 + text_size.y + 10, 20, BLACK);*/
 
@@ -410,6 +418,7 @@ int main() {
 	}
 
 	UnloadTexture(Metropolis.sub_texture);
+	UnloadTexture(station_texture);
 
 	return 0;
 }
