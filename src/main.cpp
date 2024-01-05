@@ -123,7 +123,7 @@ void Subway::move_to_station(Vector2 target_position, Subway& previous_subway){
 
 		int direction = (distance > 0) ? 1 : -1;
 
-		if (distance_to_previous < this->get_safe_distance()) {
+		if (distance_to_previous < this->get_safe_distance() && previous_subway.direction == direction) {
 			// Arrêt progressif en fonction de la proximité avec le métro précédent
 			float brake_factor = distance_to_previous / safe_distance;
 			this->set_speed(ceil((float)this->get_speed() * (float)brake_factor));
@@ -367,6 +367,8 @@ void core_gameplay(vector<Station*> metro_line, vector<Subway*> metro_subway, in
 
 
 void start_thread(int index, vector<Station*> metro_line, vector<Subway*> metro_subway, jthread* subway_thread) {
+	metro_subway_active.push_back(metro_subway[index]);
+	metro_subway[index]->coordinates = { metro_line[0]->station_location.x, metro_line[0]->station_location.y };
 	subway_thread[index] = (jthread([=]() {core_gameplay(metro_line, metro_subway, index, subway_thread); }));
 }
 
@@ -400,8 +402,8 @@ int main() {
 	}
 
 	// POS AND TEXTURE LOADING
-	Metropolis.coordinates = { 100, 400 };
-	Metropompied.coordinates = { 100, 400 };
+	/*Metropolis.coordinates = { 100, 400 };
+	Metropompied.coordinates = { 100, 400 };*/
 	//Metrambulance.coordinates = { 100, 400 };
 
 	Metropolis.sub_texture = LoadTexture(ASSETS_PATH"sub1_asset.png");
@@ -429,8 +431,8 @@ int main() {
 		}
 
 		// DRAWING SUBWAY
-		for (int i = 0; i < metro_subway.size(); ++i) {
-			DrawTextureEx(metro_subway[i]->sub_texture, { metro_subway[i]->coordinates.x - ceil((float)metro_subway[i]->sub_texture.width / (float)2), metro_subway[i]->coordinates.y }, 0, 1, WHITE);
+		for (int i = 0; i < metro_subway_active.size(); ++i) {
+			DrawTextureEx(metro_subway_active[i]->sub_texture, { metro_subway_active[i]->coordinates.x - ceil((float)metro_subway_active[i]->sub_texture.width / (float)2), metro_subway_active[i]->coordinates.y }, 0, 1, WHITE);
 		}
 
 		EndDrawing();

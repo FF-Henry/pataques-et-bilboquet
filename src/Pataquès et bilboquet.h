@@ -118,6 +118,8 @@ void start_thread(int index, vector<Station*> metro_line, vector<Subway*> metro_
 
 void core_gameplay(vector<Station*> metro_line, vector<Subway*> metro_subway, int sub_index, jthread* subway_thread);
 
+vector<Subway*> metro_subway_active;
+
 //Subway Subway::operator=(Subway &subway) {
 //	Subway temp;
 //	temp.set_id(subway.get_id());
