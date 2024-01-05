@@ -23,11 +23,12 @@ private:
 	int id;
 	int people;
 	int max_people;
-	float speed;
-	float max_speed;
-	float acceleration;
+	int speed;
+	int max_speed;
+	int acceleration;
 	bool direction = true; // True est le sens croissant (pour l'aller) des stations et false le sens décroissant (pour le retour)
 	int station_id;
+	int safe_distance = 40;
 	
 	//mutex position_mutex;
 	//condition_variable position_condition;
@@ -36,7 +37,7 @@ private:
 public:
 	
 	Subway();
-	Subway(const int& init_id,const int& init_people,const int& init_max_people,const float& init_speed,const float& init_max_speed,const float& init_acceleration, const bool& init_direction, const int& init_station_id);
+	Subway(const int& init_id,const int& init_people,const int& init_max_people,const int& init_speed,const int& init_max_speed,const int& init_acceleration, const bool& init_direction, const int& init_station_id);
 	
 	//Subway operator=(Subway&);
 
@@ -46,9 +47,9 @@ public:
 	void set_id(const int& setid);
 	void set_people(const int& setpeople);
 	void set_maxpeople(const int& setmaxpeople);
-	void set_speed(const float& setspeed);
-	void set_maxspeed(const float& setmaxspeed);
-	void set_acceleration(const float& setacceleration);
+	void set_speed(const int& setspeed);
+	void set_maxspeed(const int& setmaxspeed);
+	void set_acceleration(const int& setacceleration);
 	void reverse_direction();
 	void set_station_id(const int& id);
 
@@ -56,14 +57,15 @@ public:
 	int get_id();
 	int get_people();
 	int get_maxpeople();
-	float get_speed();
-	float get_acceleration();
-	float get_max_speed();
+	int get_speed();
+	int get_acceleration();
+	int get_max_speed();
 	bool get_direction();
 	int get_station_id();
+	int get_safe_distance();
 
 
-	void move_to_station(Vector2 target_position);
+	void move_to_station(Vector2 target_position, Subway& previous_subway);
 };
 
 
@@ -114,8 +116,7 @@ public:
 void start_thread(int index, vector<Station*> metro_line, vector<Subway*> metro_subway, jthread* subway_thread);
 
 
-void subway_move(vector<Station*> metro_line, vector<Subway*> metro_subway, int sub_index, jthread* subway_thread);
-
+void core_gameplay(vector<Station*> metro_line, vector<Subway*> metro_subway, int sub_index, jthread* subway_thread);
 
 //Subway Subway::operator=(Subway &subway) {
 //	Subway temp;

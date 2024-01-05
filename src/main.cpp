@@ -28,7 +28,7 @@ Subway::Subway() {
 	station_id = 0;
 }
 
-Subway::Subway(const int& init_id, const int& init_people, const int& init_max_people, const float& init_speed, const float& init_max_speed, const float& init_acceleration, const bool& init_direction, const int& init_station_id) {
+Subway::Subway(const int& init_id, const int& init_people, const int& init_max_people, const int& init_speed, const int& init_max_speed, const int& init_acceleration, const bool& init_direction, const int& init_station_id) {
 	id = init_id;
 	people = init_people;
 	max_people = init_max_people;
@@ -52,15 +52,15 @@ void Subway::set_maxpeople(const int& setmaxpeople) {
 	max_people = setmaxpeople;
 }
 
-void Subway::set_speed(const float& setspeed) {
+void Subway::set_speed(const int& setspeed) {
 	speed = setspeed;
 }
 
-void Subway::set_maxspeed(const float& setmaxspeed) {
+void Subway::set_maxspeed(const int& setmaxspeed) {
 	max_speed = setmaxspeed;
 }
 
-void Subway::set_acceleration(const float& setacceleration) {
+void Subway::set_acceleration(const int& setacceleration) {
 	acceleration = setacceleration;
 }
 
@@ -85,15 +85,15 @@ int Subway::get_maxpeople() {
 }
 
 
-float Subway::get_speed() {
+int Subway::get_speed() {
 	return speed;
 }
 
-float Subway::get_acceleration() {
+int Subway::get_acceleration() {
 	return acceleration;
 }
 
-float Subway::get_max_speed() {
+int Subway::get_max_speed() {
 	return max_speed;
 }
 
@@ -105,26 +105,40 @@ int Subway::get_station_id() {
 	return station_id;
 }
 
-void Subway::move_to_station(Vector2 target_position){
+int Subway::get_safe_distance(){
+	return safe_distance;
+}
+
+void Subway::move_to_station(Vector2 target_position, Subway& previous_subway){
 
 	int distance = static_cast<int>(target_position.x) - static_cast<int>(this->coordinates.x);
-	
+	int distance_to_previous = abs(previous_subway.coordinates.x - this->coordinates.x);
+
 	while (abs(distance) > 0) {
 
 		this_thread::sleep_for(10ms);
 
 		distance = static_cast<int>(target_position.x) - static_cast<int>(this->coordinates.x);
+		distance_to_previous = abs(previous_subway.coordinates.x - this->coordinates.x);
+
 		int direction = (distance > 0) ? 1 : -1;
 
-		if (abs(distance) < this->get_speed()) {
-			this->set_speed(this->get_speed() - this->get_acceleration());
+		if (distance_to_previous < this->get_safe_distance()) {
+			// Arrêt progressif en fonction de la proximité avec le métro précédent
+			float brake_factor = distance_to_previous / safe_distance;
+			this->set_speed(ceil((float)this->get_speed() * (float)brake_factor));
 		}
-		else {
-			this->set_speed(this->get_speed() + this->get_acceleration());
-			if (this->get_speed() > this->get_max_speed()) {
-				this->set_speed(this->get_max_speed());
+		else{
+			if (abs(distance) < this->get_speed()) {
+				this->set_speed(this->get_speed() - this->get_acceleration());
 			}
+			else {
+				this->set_speed(this->get_speed() + this->get_acceleration());
+				if (this->get_speed() > this->get_max_speed()) {
+					this->set_speed(this->get_max_speed());
+				}
 
+			}
 		}
 		coordinates.x += direction * static_cast<int>(this->get_speed());
 	}
@@ -284,16 +298,10 @@ void Station::people_onboarding(Subway subway_in) {
 	//cout << "Tot in station : " << people_in_station << ", people now in subway : " << sub_in_station.get_people() << endl;
 }
 
-// fonctions 
-
-// déclaration anticipée 
-
-
-
-void subway_move(vector<Station*> metro_line, vector<Subway*> metro_subway, int sub_index, jthread* subway_thread) {
+void core_gameplay(vector<Station*> metro_line, vector<Subway*> metro_subway, int sub_index, jthread* subway_thread) {
 
 	this_thread::sleep_for(100ms);
-	auto nb_fois = 1; // nombre de fois que le metro va faire l'aller retour
+	auto nb_fois = 2; // nombre de fois que le metro va faire l'aller retour
 	int next_id = metro_subway[sub_index]->get_id(); // permettra de démarrer les metros avec un decalage 
 	int ratio = ceil((float)(metro_line.size() - 1) * 2 / (float)metro_subway.size()); // ceil permet d'arrondir a l'entier superieur
 	bool start = true;
@@ -314,7 +322,16 @@ void subway_move(vector<Station*> metro_line, vector<Subway*> metro_subway, int 
 			}*/ //a tester 
 
 			if (!start && (index == 0 || index == metro_line.size() - 1)) {
-				metro_subway[sub_index]->move_to_station(metro_line[index]->station_location);
+
+				if (sub_index > 0) {
+					// Appel de move_to_station avec le métro précédent
+					metro_subway[sub_index]->move_to_station(metro_line[index]->station_location, *metro_subway[sub_index - 1]);
+				}
+				else {
+					// Premier métro sans métro précédent
+					metro_subway[sub_index]->move_to_station(metro_line[index]->station_location, *metro_subway[metro_subway.size() - 1]);
+				}
+
 				cout << metro_subway[sub_index]->get_id() << " in depot " << index << "\n";
 				metro_subway[sub_index]->reverse_direction();
 				start = true;
@@ -322,7 +339,15 @@ void subway_move(vector<Station*> metro_line, vector<Subway*> metro_subway, int 
 			else if (index != 0 && index != metro_line.size() - 1) {
 				if (start) start = false;
 
-				metro_subway[sub_index]->move_to_station(metro_line[index]->station_location);
+				if(sub_index > 0) {
+					// Appel de move_to_station avec le métro précédent
+					metro_subway[sub_index]->move_to_station(metro_line[index]->station_location, *metro_subway[sub_index - 1]);
+				}
+				else {
+					// Premier métro sans métro précédent
+					metro_subway[sub_index]->move_to_station(metro_line[index]->station_location, *metro_subway[metro_subway.size()-1]);
+				}
+
 				metro_line[index]->subway_entrance(*metro_subway[sub_index]);
 				*metro_subway[sub_index] = metro_line[index]->subway_exit(*metro_subway[sub_index]);
 				cout << "===============================================" << endl << endl;
@@ -342,10 +367,8 @@ void subway_move(vector<Station*> metro_line, vector<Subway*> metro_subway, int 
 
 
 void start_thread(int index, vector<Station*> metro_line, vector<Subway*> metro_subway, jthread* subway_thread) {
-	subway_thread[index] = (jthread([=]() {subway_move(metro_line, metro_subway, index, subway_thread); }));
-
+	subway_thread[index] = (jthread([=]() {core_gameplay(metro_line, metro_subway, index, subway_thread); }));
 }
-
 
 
 int main() {
@@ -362,12 +385,12 @@ int main() {
 	Station Depot2("Depot2", 0, 0, false, false, { 1500, 400 });
 
 	Subway Metropolis(1, 10, 40, 0, 3, 1, true, 0);
-	Subway Metropompied(2, 10, 40, 0, 3, 1, true, 0);
-	Subway Metronome(3, 10, 40, 0, 10, 3, true, 0);
-	Subway Metrambulance(4, 10, 40, 0, 3, 1, true, 0);
+	Subway Metropompied(2, 10, 40, 0, 5, 1, true, 0);
+	Subway Metrambulance(3, 10, 40, 0, 3, 1, true, 0);
+	Subway Metronome(4, 10, 40, 0, 10, 3, true, 0);
 
 	vector<Station*> metro_line = { &Depot1, &Lille , &Berlin, &Moscou, &Madrid, &Depot2 };
-	vector<Subway*> metro_subway = { &Metropolis, &Metropompied };//, &Metronome, &Metrambulance };
+	vector<Subway*> metro_subway = { &Metropolis, &Metropompied }; //, &Metrambulance };//, &Metronome };
 
 	jthread subway_thread[2];
 
@@ -379,9 +402,11 @@ int main() {
 	// POS AND TEXTURE LOADING
 	Metropolis.coordinates = { 100, 400 };
 	Metropompied.coordinates = { 100, 400 };
+	//Metrambulance.coordinates = { 100, 400 };
 
 	Metropolis.sub_texture = LoadTexture(ASSETS_PATH"sub1_asset.png");
 	Metropompied.sub_texture = LoadTexture(ASSETS_PATH"sub2_asset.png");
+	//Metrambulance.sub_texture = LoadTexture(ASSETS_PATH"sub3_asset.png");
 
 	Depot1.station_texture = LoadTexture(ASSETS_PATH"depot_asset.png");
 	Depot2.station_texture = LoadTexture(ASSETS_PATH"depot_asset.png");
@@ -408,10 +433,6 @@ int main() {
 			DrawTextureEx(metro_subway[i]->sub_texture, { metro_subway[i]->coordinates.x - ceil((float)metro_subway[i]->sub_texture.width / (float)2), metro_subway[i]->coordinates.y }, 0, 1, WHITE);
 		}
 
-		/*const char* text = "PATAPROUT";d
-		const Vector2 text_size = MeasureTextEx(GetFontDefault(), text, 20, 1);
-		DrawText(text, SCREEN_WIDTH / 2 - text_size.x / 2, 500 + text_size.y + 10, 20, BLACK);*/
-
 		EndDrawing();
 	}
 
@@ -436,3 +457,10 @@ int main() {
 
 	return 0;
 }
+
+
+
+
+/*const char* text = "PATAPROUT";d
+const Vector2 text_size = MeasureTextEx(GetFontDefault(), text, 20, 1);
+DrawText(text, SCREEN_WIDTH / 2 - text_size.x / 2, 500 + text_size.y + 10, 20, BLACK);*/
