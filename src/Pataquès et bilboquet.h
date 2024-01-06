@@ -15,8 +15,9 @@
 #include <shared_mutex>
 #include "raylib.h"
 
-
 using namespace std;
+
+class Station;
 
 class Subway {
 private:
