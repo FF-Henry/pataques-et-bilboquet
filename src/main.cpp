@@ -367,6 +367,12 @@ int main() {
 		// DRAWING SUBWAY
 		for (int i = 0; i < metro_subway_active.size(); ++i) {
 			DrawTextureEx(metro_subway_active[i]->sub_texture, { metro_subway_active[i]->coordinates.x - ceil((float)metro_subway_active[i]->sub_texture.width / (float)2), metro_subway_active[i]->coordinates.y }, 0, 1, WHITE);
+			string text = "Metro " + to_string(metro_subway_active[i]->get_id()) +
+				" | People: " + to_string(metro_subway_active[i]->get_people()) +
+				" | Speed: " + to_string(metro_subway_active[i]->get_speed()) +
+				" | Direction: " + (metro_subway_active[i]->get_direction() ? "Forward" : "Return") +
+				" | Station ID: " + to_string(metro_subway_active[i]->get_station_id());
+			DrawText(text.c_str(), 50, 50 + i*20, 20, BLACK);
 		}
 
 		EndDrawing();
