@@ -20,40 +20,34 @@ using namespace std;
 
 class Subway {
 private:
-	int id;
-	int people;
-	int max_people;
-	int speed;
-	int max_speed;
-	int acceleration;
-	bool direction = true; // True est le sens croissant (pour l'aller) des stations et false le sens décroissant (pour le retour)
-	int station_id;
-	int safe_distance = 125;
-	
-	//mutex position_mutex;
-	//condition_variable position_condition;
-
+	int id;					 // id du metro
+	int people;				 // nombre de personne lors de la creation du métro
+	int max_people;			 // nomre de personne maximum
+	int speed;				 // vitesse du metro
+	int max_speed;			 // vitesse maximale
+	int acceleration;		 // acceleration // attention ce n'est pas un coefficient 
+	bool direction = true;	 // True est le sens croissant (pour l'aller) des stations et false le sens décroissant (pour le retour) // true par défaut
+	int station_id;			 // id de la station dans laquelle est le métro
+	int safe_distance = 200; // distance de sécurité (en px) entre les métro // 200px par défaut
 
 public:
-	
+
+	Vector2 coordinates; // coordonnées du métro 
+	Texture2D sub_texture; // sprite du métro
+
 	Subway();
-	Subway(const int& init_id,const int& init_people,const int& init_max_people,const int& init_speed,const int& init_max_speed,const int& init_acceleration, const bool& init_direction, const int& init_station_id);
-	
-	//Subway operator=(Subway&);
+	Subway(const int& init_id, const int& init_people, const int& init_max_people, const int& init_speed, const int& init_max_speed, const int& init_acceleration, const bool& init_direction, const int& init_station_id);
 
-	Vector2 coordinates;
-	Texture2D sub_texture;
-
+	// setters //
 	void set_id(const int& setid);
 	void set_people(const int& setpeople);
 	void set_maxpeople(const int& setmaxpeople);
 	void set_speed(const int& setspeed);
 	void set_maxspeed(const int& setmaxspeed);
 	void set_acceleration(const int& setacceleration);
-	void reverse_direction();
 	void set_station_id(const int& id);
 
-
+	// getters //
 	int get_id();
 	int get_people();
 	int get_maxpeople();
@@ -64,71 +58,72 @@ public:
 	int get_station_id();
 	int get_safe_distance();
 
+	// méthode //
 
+	/*reverse_direction
+	- inverse la direction du métro*/
+	void reverse_direction();
+
+	/*move_to_station
+	- déplace le métro vers la station donnée en parametre et faisant attention a respecter les distances de sécurité avec le metro dévant lui (metro donnée en parametre)*/
 	void move_to_station(Vector2 target_position, Subway& previous_subway);
 };
 
 
 class Station {
 private:
-	string name;
-	int id;
-	int people_forward;
-	int people_return;
-	bool is_subway;
-	bool is_ready;
-	Subway sub_in_station_forward;
-	Subway sub_in_station_return;
+	string name;					// nom de la station
+	int id;							// id de la station
+	int people_forward;				// nombre de personne dans la station dans le sens aller 
+	int people_return;				// nombre de personne dans la station dans le sens retour
+	bool is_subway;					// permet de savoir si un métro est dans la station
+	Subway sub_in_station_forward;	// permet de savoir quel métro est dans le sens aller
+	Subway sub_in_station_return;	// permet de savoir quel métro est dans le sens retour
 
 public:
 
-	Vector2 station_location;
-	Texture2D station_texture;
+	Vector2 station_location;		// coordonnée de la station
+	Texture2D station_texture;		// texture de la station
 
-	Station(const string& init_name, const int& init_people_forward, const int& init_people_return, const bool& init_is_subway, const bool& init_is_ready, const Vector2& init_station_location);
+	Station(const string& init_name, const int& init_people_forward, const int& init_people_return, const bool& init_is_subway, const Vector2& init_station_location);
+
+	// setters //
 	void set_name(const char& setname);
 	void set_id(const int& setid);
 	void set_people_forward(const int& setpeopleforward);
 	void set_people_return(const int& setpeoplereturn);
-	void set_is_ready(const bool& flag);
 	void set_is_subway(const bool& flag);
 	void set_sub_in_station_forward(Subway subway_in);
 	void set_sub_in_station_return(Subway subway_in);
 
+	// getters //
 	string get_name();
 	int get_id();
 	int get_people_forward();
 	int get_people_return();
 	bool get_is_subway();
-	bool get_is_ready();
 	Subway get_sub_in_station_forward();
 	Subway get_sub_in_station_return();
 
 
-	// Méthodes autres que get / set
+	// méthodes //
+
+	/*subway_entrance
+	- entre dans une station dans le bon sens et execute people_offboarding et people_onboarding*/
 	void subway_entrance(Subway subway_in);
+
+	/*subway_exit
+	- return le métro qui est dans la station dans le bon sens et libère la station*/
 	Subway subway_exit(Subway subway_in);
 
 	void people_offboarding(Subway subway_in);
 	void people_onboarding(Subway subway_in);
 };
 
+/*start_thread
+- initialise les coordonées du metro et l'ajoute dans la liste des metro actif puis demarre un thread de la fonction core_gameplay avec les paramètre spécifiés*/
 void start_thread(int index, vector<Station*> metro_line, vector<Subway*> metro_subway, jthread* subway_thread);
-
 
 void core_gameplay(vector<Station*> metro_line, vector<Subway*> metro_subway, int sub_index, jthread* subway_thread);
 
-vector<Subway*> metro_subway_active;
-
-//Subway Subway::operator=(Subway &subway) {
-//	Subway temp;
-//	temp.set_id(subway.get_id());
-//	temp.set_people(subway.get_people());
-//	temp.set_maxpeople(subway.get_maxpeople());
-//	temp.set_speed(subway.get_speed());
-//	temp.set_maxspeed(subway.get_max_speed());
-//	temp.set_acceleration(subway.get_acceleration());
-//	temp.set_direction(subway.get_direction());
-//	temp.set_station_id(subway.get_station_id());
-//	return temp;
-//}
+vector<Subway*> metro_subway_active; // variables globales qui nous indiquent les métros actif ( permet d'eviter d'avoir des metros en "attente de demarrage")
