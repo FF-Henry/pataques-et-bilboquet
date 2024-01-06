@@ -320,8 +320,7 @@ int main() {
 		metro_line[i]->set_id(i);
 	}
 
-	// TEXTURE LOADING //
-
+	// TEXTURE LOADING
 	Metropolis.sub_texture = LoadTexture(ASSETS_PATH"sub1_asset.png");
 	Metropompied.sub_texture = LoadTexture(ASSETS_PATH"sub2_asset.png");
 	Metrambulance.sub_texture = LoadTexture(ASSETS_PATH"sub3_asset.png");
@@ -345,13 +344,24 @@ int main() {
 
 		DrawTextureEx(background, { 0,0 }, 0, 1, WHITE); // draw background
 
-		// DRAWING STATION
+		// DRAWING STATION FORWARD
 		for (int i = 0; i < metro_line.size(); i++) {
 			DrawTextureEx(metro_line[i]->station_texture, { metro_line[i]->station_location.x - ceil((float)metro_line[i]->station_texture.width / (float)2), 300 }, 0, 1, WHITE);
+			if (i != 0 && i != metro_line.size() - 1) {
+				string text = "People in station fw -> " + to_string(metro_line[i]->get_people_forward());
+				const Vector2 text_size = MeasureTextEx(GetFontDefault(), text.c_str(), 20, 1);
+				DrawText(text.c_str(), metro_line[i]->station_location.x - ceil((float)text_size.x / (float)2), 425 + text_size.y, 20, BLACK);
+			}
 		}
 
+		// DRAWING STATION RETURN
 		for (int i = 0; i < metro_line.size(); i++) {
 			DrawTextureEx(metro_line[i]->station_texture, { metro_line[i]->station_location.x - ceil((float)metro_line[i]->station_texture.width / (float)2), 510 }, 0, 1, WHITE);
+			if (i != 0 && i != metro_line.size() - 1) {
+				string text = "People in station rtn -> " + to_string(metro_line[i]->get_people_return());
+				const Vector2 text_size = MeasureTextEx(GetFontDefault(), text.c_str(), 20, 1);
+				DrawText(text.c_str(), metro_line[i]->station_location.x - ceil((float)text_size.x / (float)2), 640 + text_size.y, 20, BLACK);
+			}
 		}
 
 		// DRAWING SUBWAY
