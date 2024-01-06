@@ -75,6 +75,8 @@ void Subway::move_to_station(Vector2 target_position, Subway& previous_subway) {
 	int distance = static_cast<int>(target_position.x) - static_cast<int>(this->coordinates.x);
 	int distance_to_previous = abs(previous_subway.coordinates.x - this->coordinates.x);
 
+	bool delay = true;
+
 	while (abs(distance) > 0) {
 
 		this_thread::sleep_for(10ms);
@@ -90,27 +92,22 @@ void Subway::move_to_station(Vector2 target_position, Subway& previous_subway) {
 			this->set_speed(ceil((float)this->get_speed() * (float)brake_factor));
 		}
 		else {
-			if (abs(distance) < this->get_speed()) {
+			if (abs(distance) < this->get_speed()*2) {
 				this->set_speed(this->get_speed() - this->get_acceleration());
 			}
-			else {
-				this->set_speed(this->get_speed() + this->get_acceleration());
+			else { 
+				this->set_speed(this->get_speed() + this->get_acceleration()); 
 				if (this->get_speed() > this->get_max_speed()) {
 					this->set_speed(this->get_max_speed());
 				}
-
 			}
 		}
-
 		if (target_position.x == 1500 && coordinates.x == 1500) {
 			coordinates.y = 615;
-
 		}
 		if (target_position.x == 100 && coordinates.x == 100) {
 			coordinates.y = 400;
-
 		}
-
 		coordinates.x += direction_indicator * static_cast<int>(this->get_speed());
 	}
 	this->set_speed(0);
@@ -187,7 +184,7 @@ Subway Station::subway_exit(Subway subway_in) {
 void Station::people_offboarding(Subway subway_in) {
 
 	int people_in_subway = (subway_in.get_direction()) ? sub_in_station_forward.get_people() : sub_in_station_return.get_people(); // on récupère le nombre de personne dans le sens aller ou retour 
-	if (people_in_subway != 0) { // si la station n'est pas vide
+	if (people_in_subway != 0) { // si le metro dans la station n'est pas vide
 		int off = rand() % people_in_subway + 1; // quantité aléatoire de personne qui sortent
 		//cout << "Tot in subway : " << people_in_subway << ", getting out : " << off << endl; // debug
 		for (int i = 1; i <= off; i++) { 
@@ -211,7 +208,7 @@ void Station::people_onboarding(Subway subway_in) {
 	int people_in_station = (subway_in.get_direction()) ? this->get_people_forward() : this->get_people_return();
 	//cout << "Tot in station : " << people_in_station << ", space left : " << space_left << endl;
 	int iter = (space_left < people_in_station) ? space_left : people_in_station;
-	for (int i = 1; i <= iter; i++) {
+	for (int i = 0; i < iter; i++) {
 		this_thread::sleep_for(10ms);  // on attends Xms pour simuler les personnes qui entrent (désactivé pour le déboggage) 
 	}
 	//cout << "+" << iter << " in" << endl;
@@ -223,7 +220,7 @@ void Station::people_onboarding(Subway subway_in) {
 		this->set_people_return(people_in_station - iter);
 		sub_in_station_return.set_people(sub_in_station_return.get_people() + iter); // on met a jour
 	}
-	people_in_station = (subway_in.get_direction()) ? this->get_people_forward() : this->get_people_return();
+	//people_in_station = (subway_in.get_direction()) ? this->get_people_forward() : this->get_people_return();
 	//cout << "Tot in station : " << people_in_station << ", people now in subway : " << sub_in_station.get_people() << endl;
 }
 
@@ -276,7 +273,7 @@ void core_gameplay(vector<Station*> metro_line, vector<Subway*> metro_subway, in
 				cout << "===============================================" << endl << endl; // debug
 			}
 			if (i != 0 && i % ratio == 0 && next_id < metro_subway.size()) { // si la distance entre les lignes est bonne + on evite les out of range
-				cout << "encore ((((((((((((((((((((((((((((((((((((((((((((" << endl; // debug
+				cout << "A new metro just spawned ---------------------<" << endl; // debug
 				start_thread(next_id, metro_line, metro_subway, subway_thread);
 				next_id = 999;
 			}
@@ -305,9 +302,9 @@ int main() {
 	Station Depot2("Depot2", 0, 0, false, { 1500, 400 });
 
 	// déclaration des class metro //
-	Subway Metropolis(1, 10, 40, 0, 3, 1, true, 0);
-	Subway Metropompied(2, 10, 40, 0, 3, 1, true, 0);
-	Subway Metrambulance(3, 10, 40, 0, 3, 1, true, 0);
+	Subway Metropolis(1, 10, 40, 0, 5, 1, true, 0);
+	Subway Metropompied(2, 10, 40, 0, 5, 1, true, 0);
+	Subway Metrambulance(3, 10, 40, 0, 5, 1, true, 0);
 	//Subway Metronome(4, 10, 40, 0, 10, 3, true, 0);
 
 	vector<Station*> metro_line = { &Depot1, &Lille , &Berlin, &Moscou, &Depot2 }; // stations du metro
