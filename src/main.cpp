@@ -184,10 +184,13 @@ Subway Station::subway_exit(Subway subway_in) {
 void Station::people_offboarding(Subway subway_in) {
 
 	int people_in_subway = (subway_in.get_direction()) ? sub_in_station_forward.get_people() : sub_in_station_return.get_people(); // on récupère le nombre de personne dans le sens aller ou retour 
-	if (people_in_subway != 0) { // si le metro dans la station n'est pas vide
-		int off = rand() % people_in_subway + 1; // quantité aléatoire de personne qui sortent
+	if (people_in_subway > 0) { // si le metro dans la station n'est pas vide
+		random_device rd; // generation aleatoire
+		mt19937 generator(rd()); // on recupère l'heure syteme
+		uniform_int_distribution<int> distribution(1, people_in_subway); // range du rand
+		int off = distribution(generator); // quantité aléatoire de personne qui sortent
 		//cout << "Tot in subway : " << people_in_subway << ", getting out : " << off << endl; // debug
-		for (int i = 1; i <= off; i++) { 
+		for (int i = 1; i < off; i++) { 
 			this_thread::sleep_for(10ms); // on attends Xms pour simuler les personnes qui sortent (désactivé pour le déboggage) 
 		}
 		if (subway_in.get_direction()) {
@@ -204,24 +207,31 @@ void Station::people_offboarding(Subway subway_in) {
 
 void Station::people_onboarding(Subway subway_in) {
 
-	int space_left = (subway_in.get_direction()) ? sub_in_station_forward.get_maxpeople() - sub_in_station_forward.get_people() : sub_in_station_return.get_maxpeople() - sub_in_station_return.get_people(); // on regarde la place qu'il reste dans le metro en fonction de la place maximale et du nombre de personne deja dedans 
-	int people_in_station = (subway_in.get_direction()) ? this->get_people_forward() : this->get_people_return();
-	//cout << "Tot in station : " << people_in_station << ", space left : " << space_left << endl;
-	int iter = (space_left < people_in_station) ? space_left : people_in_station;
-	for (int i = 0; i < iter; i++) {
-		this_thread::sleep_for(10ms);  // on attends Xms pour simuler les personnes qui entrent (désactivé pour le déboggage) 
+	int space_left = (subway_in.get_direction()) ? sub_in_station_forward.get_maxpeople() - sub_in_station_forward.get_people() : sub_in_station_return.get_maxpeople() - sub_in_station_return.get_people(); // on regarde la place qu'il reste dans le metro en fonction de la place maximale et du nombre de personne deja dedans
+	int people_atm = (subway_in.get_direction() ? people_forward : people_return); // on regarde le nombre de personne dans la station dans le sens du metro
+	int qty_entrance = (space_left >= people_atm) ? people_atm : space_left;
+	if (space_left != 0 && people_atm > 0) { // si le metro est deja plein alors on passe
+		int people_in_station = (subway_in.get_direction()) ? this->get_people_forward() : this->get_people_return();
+		random_device rd; // generation aleatoire
+		mt19937 generator(rd()); // on recupère l'heure systeme 
+		uniform_int_distribution<int> distribution(1, qty_entrance); // range du rand
+		int iter = distribution(generator); // quantité aléatoire de personne qui entrent
+		//cout << "Tot in station : " << people_in_station << ", space left : " << space_left << endl;
+		for (int i = 0; i < iter; i++) {
+			this_thread::sleep_for(10ms);  // on attends Xms pour simuler les personnes qui entrent (désactivé pour le déboggage) 
+		}
+		//cout << "+" << iter << " in" << endl;
+		if (subway_in.get_direction()) {
+			this->set_people_forward(people_in_station - iter);
+			sub_in_station_forward.set_people(sub_in_station_forward.get_people() + iter); // on met a jour
+		}
+		else {
+			this->set_people_return(people_in_station - iter);
+			sub_in_station_return.set_people(sub_in_station_return.get_people() + iter); // on met a jour
+		}
+		//people_in_station = (subway_in.get_direction()) ? this->get_people_forward() : this->get_people_return();
+		//cout << "Tot in station : " << people_in_station << ", people now in subway : " << sub_in_station.get_people() << endl;
 	}
-	//cout << "+" << iter << " in" << endl;
-	if (subway_in.get_direction()) {
-		this->set_people_forward(people_in_station - iter);
-		sub_in_station_forward.set_people(sub_in_station_forward.get_people() + iter); // on met a jour
-	}
-	else {
-		this->set_people_return(people_in_station - iter);
-		sub_in_station_return.set_people(sub_in_station_return.get_people() + iter); // on met a jour
-	}
-	//people_in_station = (subway_in.get_direction()) ? this->get_people_forward() : this->get_people_return();
-	//cout << "Tot in station : " << people_in_station << ", people now in subway : " << sub_in_station.get_people() << endl;
 }
 
 void core_gameplay(vector<Station*> metro_line, vector<Subway*> metro_subway, int sub_index, jthread* subway_thread) {
@@ -289,8 +299,9 @@ void start_thread(int index, vector<Station*> metro_line, vector<Subway*> metro_
 }
 
 int main() {
-	srand((int)time(NULL));
+	//srand((int)time(NULL));
 
+	
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pataques et bilboquet");
 	SetTargetFPS(60);
 
@@ -302,15 +313,15 @@ int main() {
 	Station Depot2("Depot2", 0, 0, false, { 1500, 400 });
 
 	// déclaration des class metro //
-	Subway Metropolis(1, 10, 40, 0, 5, 1, true, 0);
-	Subway Metropompied(2, 10, 40, 0, 5, 1, true, 0);
-	Subway Metrambulance(3, 10, 40, 0, 5, 1, true, 0);
+	Subway Metropolis(1, 10, 40, 0, 2, 1, true, 0);
+	Subway Metropompied(2, 10, 40, 0, 2, 1, true, 0);
+	Subway Metrambulance(3, 10, 40, 0, 2, 1, true, 0);
 	//Subway Metronome(4, 10, 40, 0, 10, 3, true, 0);
 
 	vector<Station*> metro_line = { &Depot1, &Lille , &Berlin, &Moscou, &Depot2 }; // stations du metro
 	vector<Subway*> metro_subway = { &Metropolis, &Metropompied, &Metrambulance }; // liste des metros 
 
-	jthread subway_thread[10]; // permet de creer des threads en fonction du nombre de metro /!\ ce n'est pas automatique il faut changer manuellement la taille du tableau
+	jthread subway_thread[10]; // permet de creer des threads en fonction du nombre de metro /!\ ce n'est pas automatique il faut changer manuellement la taille du tableau /!\
 
 	// STATION ID GIVING
 	for (int i = 1; i < metro_line.size() - 1; i++) {
