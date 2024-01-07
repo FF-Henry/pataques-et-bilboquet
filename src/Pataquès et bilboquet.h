@@ -79,7 +79,6 @@ private:
 	int id;							// id de la station
 	int people_forward;				// nombre de personne dans la station dans le sens aller 
 	int people_return;				// nombre de personne dans la station dans le sens retour
-	bool is_subway;					// permet de savoir si un métro est dans la station
 	Subway sub_in_station_forward;	// permet de savoir quel métro est dans le sens aller
 	Subway sub_in_station_return;	// permet de savoir quel métro est dans le sens retour
 
@@ -89,14 +88,13 @@ public:
 	Vector2 station_location;		// coordonnée de la station
 	Texture2D station_texture;		// texture de la station
 
-	Station(const string& init_name, const int& init_people_forward, const int& init_people_return, const bool& init_is_subway, const Vector2& init_station_location);
+	Station(const string& init_name, const int& init_people_forward, const int& init_people_return, const Vector2& init_station_location);
 
 	// setters //
 	void set_name(const char& setname);
 	void set_id(const int& setid);
 	void set_people_forward(const int& setpeopleforward);
 	void set_people_return(const int& setpeoplereturn);
-	void set_is_subway(const bool& flag);
 	void set_sub_in_station_forward(Subway subway_in);
 	void set_sub_in_station_return(Subway subway_in);
 
@@ -105,7 +103,6 @@ public:
 	int get_id();
 	int get_people_forward();
 	int get_people_return();
-	bool get_is_subway();
 	Subway get_sub_in_station_forward();
 	Subway get_sub_in_station_return();
 

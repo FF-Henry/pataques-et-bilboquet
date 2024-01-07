@@ -132,11 +132,10 @@ void Subway::move_to_station(Vector2 target_position, Subway& previous_subway) {
 
 // station //
 
-Station::Station(const string& init_name, const int& init_people_forward, const int& init_people_return, const bool& init_is_subway, const Vector2& init_station_location) {
+Station::Station(const string& init_name, const int& init_people_forward, const int& init_people_return, const Vector2& init_station_location) {
 	name = init_name;
 	people_forward = init_people_forward;
 	people_return = init_people_return;
-	is_subway = init_is_subway;
 	station_location = init_station_location;
 }
 
@@ -147,8 +146,6 @@ void Station::set_id(const int& setid) { id = setid; }
 void Station::set_people_forward(const int& setpeopleforward) {	people_forward = setpeopleforward; }
 
 void Station::set_people_return(const int& setpeoplereturn) { people_return = setpeoplereturn; }
-
-void Station::set_is_subway(const bool& flag) {	is_subway = flag; }
 
 void Station::set_sub_in_station_forward(Subway subway_in) { sub_in_station_forward = subway_in; }
 
@@ -162,15 +159,12 @@ int Station::get_people_forward() {	return people_forward; }
 
 int Station::get_people_return() { return people_return; }
 
-bool Station::get_is_subway() {	return is_subway; }
-
 Subway Station::get_sub_in_station_forward() { return sub_in_station_forward; }
 
-Subway Station::get_sub_in_station_return() {  return sub_in_station_return; }
+Subway Station::get_sub_in_station_return() { return sub_in_station_return; }
 
 void Station::subway_entrance(Subway subway_in) {
 
-	set_is_subway(true); // on met a jour l'etat de la station
 	if (subway_in.get_direction()) { // pour savoir le sens dans lequel on est (rappel : true = aller, false = retour)
 		set_sub_in_station_forward(subway_in); // on ajoute notre metro dans le bon sens de la station
 		sub_in_station_forward.set_station_id(this->id); // on recupère l'id de la station
@@ -195,7 +189,6 @@ Subway Station::subway_exit(Subway subway_in) {
 		//cout << sub_in_station_return.get_id() << " succesfully exit " << name << " direction " << sub_in_station_return.get_direction() << endl; // debug
 		return sub_in_station_return;
 	}
-	set_is_subway(false); // on libère la station
 }
 
 void Station::people_offboarding(Subway subway_in) {
@@ -325,13 +318,15 @@ int main() {
 	SetTargetFPS(60);
 
 	// déclaration des class stations //
-	Station Depot1("Depot1", 0, 0, false, { 100, 400 });
-	Station Lille("Lille", 100, 100, false, { 450, 400 });
-	Station Berlin("Berlin", 100, 100, false, { 800, 400 });
-	Station Moscou("Moscou", 100, 100, false, { 1150, 400 });
-	Station Depot2("Depot2", 0, 0, false, { 1500, 400 });
+	// Station Name(string station_name, int init_people_forward, int init_people return, Vector2 station_location);
+	Station Depot1("Depot1", 0, 0, { 100, 400 });
+	Station Lille("Lille", 100, 100, { 450, 400 });
+	Station Berlin("Berlin", 100, 100, { 800, 400 });
+	Station Moscou("Moscou", 100, 100, { 1150, 400 });
+	Station Depot2("Depot2", 0, 0, { 1500, 400 });
 
 	// déclaration des class metro //
+	// Subway Name(int id, int init_people, int max_people, int max_speed, bool init_direction, int init_station_id);
 	Subway Metropolis(1, 30, 40, 0, 5, 1, true, 0);
 	Subway Metropompied(2, 10, 40, 0, 5, 1, true, 0);
 	Subway Metrambulance(3, 20, 40, 0, 5, 1, true, 0);
@@ -490,10 +485,9 @@ int main() {
 
 	for(int i = 0; i < metro_subway.size(); ++i) { subway_thread[i].join(); } // on attends que les threads aie tous terminés
 
-	for(int j = 0; j < metro_line.size(); j++) { cout << metro_line[j]->get_people_forward() << " : fw || " << metro_line[j]->get_people_return() << " : rtn" << endl;	} // debug
+	//for(int j = 0; j < metro_line.size(); j++) { cout << metro_line[j]->get_people_forward() << " : fw || " << metro_line[j]->get_people_return() << " : rtn" << endl;	} // debug
 
-	// UNLOADING TEXTURES //
-
+	// UNLOADING TEXTURES
 	UnloadTexture(stop_button);
 	UnloadTexture(background);
 	for (int i = 0; i < metro_line.size(); i++) { UnloadTexture(metro_line[i]->station_texture); }
