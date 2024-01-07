@@ -1,5 +1,10 @@
 # Pataquès et Bilboquet
 
+## Lien vers la capsule 
+
+Gdrive : https://drive.google.com/file/d/1LSOYquiPjIQUcSNmkCfr8vhSLEjDEIB6/view?usp=sharing
+
+
 ## Description
 
 Pataquès et Bilboquet est une Modélisation simplifiée d’un système de transport de type « VAL » développé en C++ avec l'utilisation de la bibliothèque graphique Raylib. Le projet simule le déplacement de plusieurs métros entre différentes stations et leurs intéractions.
