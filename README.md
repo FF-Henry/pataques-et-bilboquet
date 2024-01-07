@@ -24,7 +24,7 @@ Pataquès et Bilboquet est une Modélisation simplifiée d’un système de tran
 
 ## Installation
 
-1. Clonez le dépôt : `git clone https://github.com/votre-utilisateur/pataques-et-bilboquet.git`
+1. Clonez le dépôt : `git clone https://github.com/FF-Henry/pataques-et-bilboquet.git`
 2. Assurez-vous d'avoir Raylib installé sur votre système.
 3. Compilez le programme avec votre compilateur C++.
 
