@@ -1,33 +1,39 @@
-# Simple and portable CMake template for raylib
+# Pataquès et Bilboquet
 
-This is a very basic project template for raylib using CMake and has been tested with Visual Studio, Visual Studio Code and CLion.
+## Description
 
-The raylib source code is included in the libs folder as it is much easier than including prebuilt binaries for every platform and configuration.
+Pataquès et Bilboquet est une Modélisation simplifiée d’un système de transport de type « VAL » développé en C++ avec l'utilisation de la bibliothèque graphique Raylib. Le projet simule le déplacement de plusieurs métros entre différentes stations et leurs intéractions.
 
-Building from the cmake file will build both raylib and `src/main.c` which includes a basic example of a raylib program.
+## Fonctionnalités
 
-The example in `src/main.c` uses an example image located in the `assets` folder.
+- Déplacement des métros entre les stations.
+- Embarquement et débarquement de passagers aux stations.
+- Gestion des collisions et de la distance de sécurité entre les métros.
+- Gestion d'un arret d'urgence géré par le superviseur.
+- Affichage des différentes informations des métros et des stations.
 
-The absolute path to the assets folder is defined by a macro `ASSETS_PATH` in the CMake file automatically which is useful during development. If you plan on releasing or sharing your game consider manually setting the value of the `ASSETS_PATH` macro.
+## Prérequis
 
-## How to use with C++
-To use with C++ simply rename `main.c` to `main.cpp` and then change the following lines in CMakelists.txt:
+- [Raylib](https://www.raylib.com/)
+- Compilateur C++ 20
 
-From:
-```
-project(raylib_template C)
+## Installation
 
-set(CMAKE_C_STANDARD 99)
+1. Clonez le dépôt : `git clone https://github.com/votre-utilisateur/pataques-et-bilboquet.git`
+2. Assurez-vous d'avoir Raylib installé sur votre système.
+3. Compilez le programme avec votre compilateur C++.
 
-add_executable(raylib_template src/main.c)
-```
+## Utilisation
 
-To:
-```
-project(raylib_template CXX)
+1. Exécutez le programme.
+2. Observez le déplacement des métros entre les stations.
+3. Interagissez avec l'interface utilisateur pour tester différentes fonctionnalités tel que l'arret d'urgence.
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+## Auteurs
 
-add_executable(raylib_template src/main.cpp)
-```
+- Mathias Lefebvre.
+- Henry Felix-Faure.
+
+## Licence
+
+Ce projet est sous licence MIT - voir le fichier [LICENSE.md](https://www.raylib.com/license.html) pour plus de détails.
