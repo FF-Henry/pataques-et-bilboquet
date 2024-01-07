@@ -302,7 +302,6 @@ void start_thread(int index, vector<Station*> metro_line, vector<Subway*> metro_
 
 int main() {
 	//srand((int)time(NULL));
-
 	
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pataques et bilboquet");
 	SetTargetFPS(60);
@@ -326,9 +325,7 @@ int main() {
 	jthread subway_thread[10]; // permet de creer des threads en fonction du nombre de metro /!\ ce n'est pas automatique il faut changer manuellement la taille du tableau /!\
 
 	// STATION ID GIVING
-	for (int i = 1; i < metro_line.size() - 1; i++) {
-		metro_line[i]->set_id(i);
-	}
+	for (int i = 1; i < metro_line.size() - 1; i++) { metro_line[i]->set_id(i); }
 
 	// TEXTURE LOADING
 	Metropolis.sub_texture = LoadTexture(ASSETS_PATH"sub1_asset.png");
@@ -352,22 +349,13 @@ int main() {
 
 	vector<int> btnState = { 0,0,0 };
 	vector<bool> btnAction = {false,false,false};
-	vector<Rectangle> btnBounds = { { 750, 42, (float)stop_button.width, frameHeight } , { 750, 42 + static_cast<float>(1) * 60.0f, (float)stop_button.width, frameHeight } , { 750, 42 + static_cast<float>(2) * 60.0f, (float)stop_button.width, frameHeight } };
-	
-		
+	vector<Rectangle> btnBounds = { { 750, 42, (float)stop_button.width, frameHeight } , { 750, 42 + static_cast<float>(1) * 60.0f, (float)stop_button.width, frameHeight } , { 750, 42 + static_cast<float>(2) * 60.0f, (float)stop_button.width, frameHeight } };		
 	// Button state: 0-NORMAL, 1-MOUSE_HOVER, 2-PRESSED
-
 
 	Vector2 mousePoint = { 0.0f, 0.0f };
 
-
-
-
-
 	// DEFAULT STATION TEXTURE LOADING
-	for (int i = 1; i < metro_line.size() - 1; i++) {
-		metro_line[i]->station_texture = LoadTexture(ASSETS_PATH"station_asset.png");
-	}
+	for (int i = 1; i < metro_line.size() - 1; i++) { metro_line[i]->station_texture = LoadTexture(ASSETS_PATH"station_asset.png"); }
 
 	start_thread(0, metro_line, metro_subway, subway_thread);
 
@@ -381,16 +369,21 @@ int main() {
 		sourceRec[1].y = btnState[1] * frameHeight;
 		sourceRec[2].y = btnState[2] * frameHeight;
 
+		// DRAWING BACKGROUND
+		DrawTextureEx(background, { 0,0 }, 0, 1, WHITE); 
 
-		DrawTextureEx(background, { 0,0 }, 0, 1, WHITE); // draw background
+		// DRAWING FPS
+		string fps_prompt = "FPS : " + to_string(GetFPS());
+		const Vector2 fps_prompt_size = MeasureTextEx(GetFontDefault(), fps_prompt.c_str(), 20, 1);
+		DrawText(fps_prompt.c_str(), 50, SCREEN_HEIGHT - 50 - ceil((float)fps_prompt_size.y / (float)2), 20, BLACK);
 
 		// DRAWING STATION FORWARD
 		for (int i = 0; i < metro_line.size(); i++) {
 			DrawTextureEx(metro_line[i]->station_texture, { metro_line[i]->station_location.x - ceil((float)metro_line[i]->station_texture.width / (float)2), 300 }, 0, 1, WHITE);
 			if (i != 0 && i != metro_line.size() - 1) {
-				string text = "People in station fw -> " + to_string(metro_line[i]->get_people_forward());
-				const Vector2 text_size = MeasureTextEx(GetFontDefault(), text.c_str(), 20, 1);
-				DrawText(text.c_str(), metro_line[i]->station_location.x - ceil((float)text_size.x / (float)2), 425 + text_size.y, 20, BLACK);
+				string people_fw_prompt = "People in station fw -> " + to_string(metro_line[i]->get_people_forward());
+				const Vector2 people_fw_prompt_size = MeasureTextEx(GetFontDefault(), people_fw_prompt.c_str(), 20, 1);
+				DrawText(people_fw_prompt.c_str(), metro_line[i]->station_location.x - ceil((float)people_fw_prompt_size.x / (float)2), 425 + people_fw_prompt_size.y, 20, BLACK);
 			}
 		}
 
@@ -398,27 +391,23 @@ int main() {
 		for (int i = 0; i < metro_line.size(); i++) {
 			DrawTextureEx(metro_line[i]->station_texture, { metro_line[i]->station_location.x - ceil((float)metro_line[i]->station_texture.width / (float)2), 510 }, 0, 1, WHITE);
 			if (i != 0 && i != metro_line.size() - 1) {
-				string text = "People in station rtn -> " + to_string(metro_line[i]->get_people_return());
-				const Vector2 text_size = MeasureTextEx(GetFontDefault(), text.c_str(), 20, 1);
-				DrawText(text.c_str(), metro_line[i]->station_location.x - ceil((float)text_size.x / (float)2), 640 + text_size.y, 20, BLACK);
+				string people_rtn_prompt = "People in station rtn -> " + to_string(metro_line[i]->get_people_return());
+				const Vector2 people_rtn_prompt_size = MeasureTextEx(GetFontDefault(), people_rtn_prompt.c_str(), 20, 1);
+				DrawText(people_rtn_prompt.c_str(), metro_line[i]->station_location.x - ceil((float)people_rtn_prompt_size.x / (float)2), 640 + people_rtn_prompt_size.y, 20, BLACK);
 			}
 		}
 
 		// DRAWING SUBWAY
-		
-
-
 		for (int i = 0; i < metro_subway_active.size(); ++i) {
 			btnAction[i] = false;
 			DrawTextureEx(metro_subway_active[i]->sub_texture, { metro_subway_active[i]->coordinates.x - ceil((float)metro_subway_active[i]->sub_texture.width / (float)2), metro_subway_active[i]->coordinates.y }, 0, 1, WHITE);
-			string text = "Metro " + to_string(metro_subway_active[i]->get_id()) +
+			string sub_info_prompt = "Metro " + to_string(metro_subway_active[i]->get_id()) +
 				" | People: " + to_string(metro_subway_active[i]->get_people()) +
 				" | Speed: " + to_string(metro_subway_active[i]->get_speed()) +
 				" | Direction: " + (metro_subway_active[i]->get_direction() ? "Forward" : "Return") +
 				" | Station ID: " + to_string(metro_subway_active[i]->get_station_id());
-			DrawText(text.c_str(), 50, 50 + i*60, 20, BLACK);
+			DrawText(sub_info_prompt.c_str(), 50, 50 + i * 20, 20, BLACK);
 			DrawTextureRec(stop_button, sourceRec[i], Vector2{ 750.0f, 42 + static_cast<float>(i) * 60.0f }, WHITE);
-			
 			
 
 			if (CheckCollisionPointRec(mousePoint, btnBounds[0]))
@@ -437,8 +426,8 @@ int main() {
 			if (btnAction[0])
 			{
 				// TODO: Any desired action
-				cout << "bytes" << endl;
-				metro_subway_active[i]->Emergency_stop = !metro_subway_active[i]->Emergency_stop;
+				cout << "bytes 1" << endl;
+				metro_subway_active[0]->Emergency_stop = !metro_subway_active[0]->Emergency_stop;
 			}
 
 			if (CheckCollisionPointRec(mousePoint, btnBounds[1]))
@@ -457,9 +446,8 @@ int main() {
 			if (btnAction[1])
 			{
 				// TODO: Any desired action
-				cout << "bytes" << endl;
-				metro_subway_active[i]->Emergency_stop = !metro_subway_active[i]->Emergency_stop;
-
+				cout << "bytes 2" << endl;
+				metro_subway_active[1]->Emergency_stop = !metro_subway_active[1]->Emergency_stop;
 			}
 
 			if (CheckCollisionPointRec(mousePoint, btnBounds[2]))
@@ -478,14 +466,11 @@ int main() {
 			if (btnAction[2])
 			{
 				// TODO: Any desired action
-				cout << "bytes" << endl;
-				metro_subway_active[i]->Emergency_stop = !metro_subway_active[i]->Emergency_stop;
-
+				cout << "bytes " << metro_subway_active[2]->get_id() << endl;
+				metro_subway_active[2]->Emergency_stop = !metro_subway_active[2]->Emergency_stop;
 			}
 		}
 
-
-		
 		EndDrawing();
 	}
 
