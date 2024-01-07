@@ -126,8 +126,8 @@ public:
 
 /*start_thread
 - initialise les coordonées du metro et l'ajoute dans la liste des metro actif puis demarre un thread de la fonction core_gameplay avec les paramètre spécifiés*/
-void start_thread(int index, vector<Station*> metro_line, vector<Subway*> metro_subway, jthread* subway_thread);
+void start_thread(int index, vector<Station*> metro_line, vector<Subway*> metro_subway, jthread* subway_thread, int nb_fois);
 
-void core_gameplay(vector<Station*> metro_line, vector<Subway*> metro_subway, int sub_index, jthread* subway_thread);
+void core_gameplay(vector<Station*> metro_line, vector<Subway*> metro_subway, int sub_index, jthread* subway_thread, int nb_fois);
 
 vector<Subway*> metro_subway_active; // variables globales qui nous indiquent les métros actif ( permet d'eviter d'avoir des metros en "attente de demarrage")

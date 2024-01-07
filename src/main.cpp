@@ -247,10 +247,10 @@ void Station::people_onboarding(Subway subway_in) {
 	}
 }
 
-void core_gameplay(vector<Station*> metro_line, vector<Subway*> metro_subway, int sub_index, jthread* subway_thread) {
+void core_gameplay(vector<Station*> metro_line, vector<Subway*> metro_subway, int sub_index, jthread* subway_thread, int nb_fois) {
 
 	this_thread::sleep_for(100ms);
-	auto nb_fois = 5; // nombre de fois que le metro va faire l'aller retour
+	// nb_fois c'est le nombre de fois que le metro va faire l'aller retour
 	int next_id = metro_subway[sub_index]->get_id(); // permettra de démarrer les metros avec un decalage 
 	int ratio = ceil((float)(metro_line.size() - 1) * 2 / (float)metro_subway.size()); // ceil permet d'arrondir a l'entier superieur
 	bool start = true;
@@ -297,7 +297,7 @@ void core_gameplay(vector<Station*> metro_line, vector<Subway*> metro_subway, in
 			}
 			if (i != 0 && i % ratio == 0 && next_id < metro_subway.size()) { // si la distance entre les lignes est bonne + on evite les out of range
 				cout << "A new metro just spawned ---------------------<" << endl; // debug
-				start_thread(next_id, metro_line, metro_subway, subway_thread);
+				start_thread(next_id, metro_line, metro_subway, subway_thread, nb_fois);
 				next_id = 999;
 			}
 		}
@@ -305,14 +305,17 @@ void core_gameplay(vector<Station*> metro_line, vector<Subway*> metro_subway, in
 	}
 }
 
-void start_thread(int index, vector<Station*> metro_line, vector<Subway*> metro_subway, jthread* subway_thread) {
+void start_thread(int index, vector<Station*> metro_line, vector<Subway*> metro_subway, jthread* subway_thread, int nb_fois) {
 	metro_subway_active.push_back(metro_subway[index]);
 	metro_subway[index]->coordinates = { metro_line[0]->station_location.x, metro_line[0]->station_location.y };
-	subway_thread[index] = (jthread([=]() {core_gameplay(metro_line, metro_subway, index, subway_thread); }));
+	subway_thread[index] = (jthread([=]() {core_gameplay(metro_line, metro_subway, index, subway_thread, nb_fois); }));
 }
 
 int main() {
 	//srand((int)time(NULL));
+	int nb_of_trip;
+	cout << "Enter the number of trip that each metro has to do : ";
+	cin >> nb_of_trip;
 	
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pataques et bilboquet");
 	SetTargetFPS(60);
@@ -368,7 +371,7 @@ int main() {
 	// DEFAULT STATION TEXTURE LOADING
 	for (int i = 1; i < metro_line.size() - 1; i++) { metro_line[i]->station_texture = LoadTexture(ASSETS_PATH"station_asset.png"); }
 
-	start_thread(0, metro_line, metro_subway, subway_thread);
+	start_thread(0, metro_line, metro_subway, subway_thread, nb_of_trip);
 
 	while (!WindowShouldClose())
 	{
