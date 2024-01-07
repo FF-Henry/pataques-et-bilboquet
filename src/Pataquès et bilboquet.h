@@ -35,7 +35,7 @@ public:
 
 	Vector2 coordinates; // coordonnées du métro 
 	Texture2D sub_texture; // sprite du métro
-	bool Emergency_stop = false;
+	bool emergency_stop = false;
 
 
 	Subway();

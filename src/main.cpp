@@ -82,34 +82,45 @@ void Subway::move_to_station(Vector2 target_position, Subway& previous_subway) {
 
 		this_thread::sleep_for(10ms);
 
-		distance = static_cast<int>(target_position.x) - static_cast<int>(this->coordinates.x);
 		distance_to_previous = abs(previous_subway.coordinates.x - this->coordinates.x);
-
 		int direction_indicator = (distance > 0) ? 1 : -1;
 
-		if (distance_to_previous < this->get_safe_distance() && previous_subway.direction == this->get_direction()) {
-			// Arrêt progressif en fonction de la proximité avec le métro précédent
-			float brake_factor = distance_to_previous / safe_distance;
-			this->set_speed(ceil((float)this->get_speed() * (float)brake_factor));
-		}
-		else {
-			if (abs(distance) < this->get_speed() * 2) {
+		if (this->emergency_stop) {
+			// Arrêt d'urgence
+			if (this->get_speed() > 0) {
 				this->set_speed(this->get_speed() - this->get_acceleration());
 			}
 			else {
-				this->set_speed(this->get_speed() + this->get_acceleration());
-				if (this->get_speed() > this->get_max_speed()) {
-					this->set_speed(this->get_max_speed());
-				}
+				this->set_speed(0);
 			}
 		}
-		if (target_position.x == 1500 && coordinates.x == 1500) {
-			coordinates.y = 615;
+		else {
+			if (distance_to_previous < this->get_safe_distance() && previous_subway.direction == this->get_direction()) {
+				// Arrêt progressif en fonction de la proximité avec le métro précédent
+				float brake_factor = distance_to_previous / safe_distance;
+				this->set_speed(ceil((float)this->get_speed() * (float)brake_factor));
+			}
+			else {
+				if (abs(distance) < this->get_speed()) {
+					this->set_speed(this->get_speed() - this->get_acceleration());
+				}
+				else {
+					this->set_speed(this->get_speed() + this->get_acceleration());
+					if (this->get_speed() > this->get_max_speed()) {
+						this->set_speed(this->get_max_speed());
+					}
+				}
+			}
+			if (this->get_direction()) {
+				coordinates.y = 400;
+			}
+			else {
+				coordinates.y = 615;
+			}
 		}
-		if (target_position.x == 100 && coordinates.x == 100) {
-			coordinates.y = 400;
-		}
+		
 		coordinates.x += direction_indicator * static_cast<int>(this->get_speed());
+		distance = static_cast<int>(target_position.x) - static_cast<int>(this->coordinates.x);
 	}
 	this->set_speed(0);
 	
@@ -189,7 +200,7 @@ void Station::people_offboarding(Subway subway_in) {
 	if (people_in_subway > 0) { // si le metro dans la station n'est pas vide
 		random_device rd; // generation aleatoire
 		mt19937 generator(rd()); // on recupère l'heure syteme
-		uniform_int_distribution<int> distribution(1, people_in_subway); // range du rand
+		uniform_int_distribution<int> distribution(0, people_in_subway); // range du rand
 		int off = distribution(generator); // quantité aléatoire de personne qui sortent
 		//cout << "Tot in subway : " << people_in_subway << ", getting out : " << off << endl; // debug
 		for (int i = 1; i < off; i++) { 
@@ -216,7 +227,7 @@ void Station::people_onboarding(Subway subway_in) {
 		int people_in_station = (subway_in.get_direction()) ? this->get_people_forward() : this->get_people_return();
 		random_device rd; // generation aleatoire
 		mt19937 generator(rd()); // on recupère l'heure systeme 
-		uniform_int_distribution<int> distribution(1, qty_entrance); // range du rand
+		uniform_int_distribution<int> distribution(0, qty_entrance); // range du rand
 		int iter = distribution(generator); // quantité aléatoire de personne qui entrent
 		//cout << "Tot in station : " << people_in_station << ", space left : " << space_left << endl;
 		for (int i = 0; i < iter; i++) {
@@ -349,7 +360,7 @@ int main() {
 
 	vector<int> btnState = { 0,0,0 };
 	vector<bool> btnAction = {false,false,false};
-	vector<Rectangle> btnBounds = { { 750, 42, (float)stop_button.width, frameHeight } , { 750, 42 + static_cast<float>(1) * 60.0f, (float)stop_button.width, frameHeight } , { 750, 42 + static_cast<float>(2) * 60.0f, (float)stop_button.width, frameHeight } };		
+	vector<Rectangle> btnBounds = { { 1000, 42, (float)stop_button.width, frameHeight } , { 1000, 42 + static_cast<float>(1) * 60.0f, (float)stop_button.width, frameHeight } , { 1000, 42 + static_cast<float>(2) * 60.0f, (float)stop_button.width, frameHeight } };		
 	// Button state: 0-NORMAL, 1-MOUSE_HOVER, 2-PRESSED
 
 	Vector2 mousePoint = { 0.0f, 0.0f };
@@ -405,9 +416,10 @@ int main() {
 				" | People: " + to_string(metro_subway_active[i]->get_people()) +
 				" | Speed: " + to_string(metro_subway_active[i]->get_speed()) +
 				" | Direction: " + (metro_subway_active[i]->get_direction() ? "Forward" : "Return") +
-				" | Station ID: " + to_string(metro_subway_active[i]->get_station_id());
+				" | Station ID: " + to_string(metro_subway_active[i]->get_station_id()) + 
+				" | Emergency_stop: " + (metro_subway_active[i]->emergency_stop ? "True" : "False");
 			DrawText(sub_info_prompt.c_str(), 50, 50 + i * 20, 20, BLACK);
-			DrawTextureRec(stop_button, sourceRec[i], Vector2{ 750.0f, 42 + static_cast<float>(i) * 60.0f }, WHITE);
+			DrawTextureRec(stop_button, sourceRec[i], Vector2{ 1000.0f, 42 + static_cast<float>(i) * 60.0f }, WHITE);
 			
 
 			if (CheckCollisionPointRec(mousePoint, btnBounds[0]))
@@ -425,9 +437,7 @@ int main() {
 
 			if (btnAction[0])
 			{
-				// TODO: Any desired action
-				cout << "bytes 1" << endl;
-				metro_subway_active[0]->Emergency_stop = !metro_subway_active[0]->Emergency_stop;
+				metro_subway_active[0]->emergency_stop = !metro_subway_active[0]->emergency_stop;
 			}
 
 			if (CheckCollisionPointRec(mousePoint, btnBounds[1]))
@@ -445,9 +455,7 @@ int main() {
 
 			if (btnAction[1])
 			{
-				// TODO: Any desired action
-				cout << "bytes 2" << endl;
-				metro_subway_active[1]->Emergency_stop = !metro_subway_active[1]->Emergency_stop;
+				metro_subway_active[1]->emergency_stop = !metro_subway_active[1]->emergency_stop;
 			}
 
 			if (CheckCollisionPointRec(mousePoint, btnBounds[2]))
@@ -465,9 +473,7 @@ int main() {
 
 			if (btnAction[2])
 			{
-				// TODO: Any desired action
-				cout << "bytes " << metro_subway_active[2]->get_id() << endl;
-				metro_subway_active[2]->Emergency_stop = !metro_subway_active[2]->Emergency_stop;
+				metro_subway_active[2]->emergency_stop = !metro_subway_active[2]->emergency_stop;
 			}
 		}
 
