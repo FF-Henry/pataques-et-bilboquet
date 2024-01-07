@@ -77,7 +77,7 @@ void Subway::move_to_station(Vector2 target_position, Subway& previous_subway) {
 	int distance_to_previous = abs(previous_subway.coordinates.x - this->coordinates.x);
 
 	bool delay = true;
-
+	
 	while (abs(distance) > 0) {
 
 		this_thread::sleep_for(10ms);
@@ -93,11 +93,11 @@ void Subway::move_to_station(Vector2 target_position, Subway& previous_subway) {
 			this->set_speed(ceil((float)this->get_speed() * (float)brake_factor));
 		}
 		else {
-			if (abs(distance) < this->get_speed()*2) {
+			if (abs(distance) < this->get_speed() * 2) {
 				this->set_speed(this->get_speed() - this->get_acceleration());
 			}
-			else { 
-				this->set_speed(this->get_speed() + this->get_acceleration()); 
+			else {
+				this->set_speed(this->get_speed() + this->get_acceleration());
 				if (this->get_speed() > this->get_max_speed()) {
 					this->set_speed(this->get_max_speed());
 				}
@@ -112,6 +112,7 @@ void Subway::move_to_station(Vector2 target_position, Subway& previous_subway) {
 		coordinates.x += direction_indicator * static_cast<int>(this->get_speed());
 	}
 	this->set_speed(0);
+	
 }
 
 // station //
@@ -408,6 +409,7 @@ int main() {
 
 
 		for (int i = 0; i < metro_subway_active.size(); ++i) {
+			btnAction[i] = false;
 			DrawTextureEx(metro_subway_active[i]->sub_texture, { metro_subway_active[i]->coordinates.x - ceil((float)metro_subway_active[i]->sub_texture.width / (float)2), metro_subway_active[i]->coordinates.y }, 0, 1, WHITE);
 			string text = "Metro " + to_string(metro_subway_active[i]->get_id()) +
 				" | People: " + to_string(metro_subway_active[i]->get_people()) +
@@ -435,6 +437,8 @@ int main() {
 			if (btnAction[0])
 			{
 				// TODO: Any desired action
+				cout << "bytes" << endl;
+				metro_subway_active[i]->Emergency_stop = !metro_subway_active[i]->Emergency_stop;
 			}
 
 			if (CheckCollisionPointRec(mousePoint, btnBounds[1]))
@@ -453,6 +457,9 @@ int main() {
 			if (btnAction[1])
 			{
 				// TODO: Any desired action
+				cout << "bytes" << endl;
+				metro_subway_active[i]->Emergency_stop = !metro_subway_active[i]->Emergency_stop;
+
 			}
 
 			if (CheckCollisionPointRec(mousePoint, btnBounds[2]))
@@ -471,6 +478,9 @@ int main() {
 			if (btnAction[2])
 			{
 				// TODO: Any desired action
+				cout << "bytes" << endl;
+				metro_subway_active[i]->Emergency_stop = !metro_subway_active[i]->Emergency_stop;
+
 			}
 		}
 

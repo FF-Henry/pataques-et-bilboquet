@@ -35,6 +35,8 @@ public:
 
 	Vector2 coordinates; // coordonnées du métro 
 	Texture2D sub_texture; // sprite du métro
+	bool Emergency_stop = false;
+
 
 	Subway();
 	Subway(const int& init_id, const int& init_people, const int& init_max_people, const int& init_speed, const int& init_max_speed, const int& init_acceleration, const bool& init_direction, const int& init_station_id);
@@ -80,6 +82,7 @@ private:
 	bool is_subway;					// permet de savoir si un métro est dans la station
 	Subway sub_in_station_forward;	// permet de savoir quel métro est dans le sens aller
 	Subway sub_in_station_return;	// permet de savoir quel métro est dans le sens retour
+
 
 public:
 
