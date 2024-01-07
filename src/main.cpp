@@ -9,6 +9,7 @@ using namespace chrono_literals; // pour mettre les threads en pause
 
 constexpr auto SCREEN_WIDTH = 1600; // largueur ecran 
 constexpr auto SCREEN_HEIGHT = 900; // hauteur ecran 
+#define NUM_FRAMES  3 
 
 // declaration class //
 
@@ -338,6 +339,30 @@ int main() {
 
 	Texture2D background = LoadTexture(ASSETS_PATH"bg.png");
 
+	Texture2D stop_button = LoadTexture(ASSETS_PATH"button.png");
+
+	// 
+	float frameHeight = (float)stop_button.height / NUM_FRAMES;
+	vector<Rectangle> sourceRec = {};
+	sourceRec.push_back({ 0, 0, (float)stop_button.width, frameHeight });
+	sourceRec.push_back({ 0, 0, (float)stop_button.width, frameHeight });
+	sourceRec.push_back({ 0, 0, (float)stop_button.width, frameHeight });
+
+
+	vector<int> btnState = { 0,0,0 };
+	vector<bool> btnAction = {false,false,false};
+	vector<Rectangle> btnBounds = { { 750, 42, (float)stop_button.width, frameHeight } , { 750, 42 + static_cast<float>(1) * 60.0f, (float)stop_button.width, frameHeight } , { 750, 42 + static_cast<float>(2) * 60.0f, (float)stop_button.width, frameHeight } };
+	
+		
+	// Button state: 0-NORMAL, 1-MOUSE_HOVER, 2-PRESSED
+
+
+	Vector2 mousePoint = { 0.0f, 0.0f };
+
+
+
+
+
 	// DEFAULT STATION TEXTURE LOADING
 	for (int i = 1; i < metro_line.size() - 1; i++) {
 		metro_line[i]->station_texture = LoadTexture(ASSETS_PATH"station_asset.png");
@@ -349,6 +374,12 @@ int main() {
 	{
 		BeginDrawing();
 		ClearBackground(WHITE);
+
+		mousePoint = GetMousePosition();
+		sourceRec[0].y = btnState[0] * frameHeight;
+		sourceRec[1].y = btnState[1] * frameHeight;
+		sourceRec[2].y = btnState[2] * frameHeight;
+
 
 		DrawTextureEx(background, { 0,0 }, 0, 1, WHITE); // draw background
 
@@ -373,6 +404,9 @@ int main() {
 		}
 
 		// DRAWING SUBWAY
+		
+
+
 		for (int i = 0; i < metro_subway_active.size(); ++i) {
 			DrawTextureEx(metro_subway_active[i]->sub_texture, { metro_subway_active[i]->coordinates.x - ceil((float)metro_subway_active[i]->sub_texture.width / (float)2), metro_subway_active[i]->coordinates.y }, 0, 1, WHITE);
 			string text = "Metro " + to_string(metro_subway_active[i]->get_id()) +
@@ -380,21 +414,82 @@ int main() {
 				" | Speed: " + to_string(metro_subway_active[i]->get_speed()) +
 				" | Direction: " + (metro_subway_active[i]->get_direction() ? "Forward" : "Return") +
 				" | Station ID: " + to_string(metro_subway_active[i]->get_station_id());
-			DrawText(text.c_str(), 50, 50 + i*20, 20, BLACK);
+			DrawText(text.c_str(), 50, 50 + i*60, 20, BLACK);
+			DrawTextureRec(stop_button, sourceRec[i], Vector2{ 750.0f, 42 + static_cast<float>(i) * 60.0f }, WHITE);
+			
+			
+
+			if (CheckCollisionPointRec(mousePoint, btnBounds[0]))
+			{
+				if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) btnState[0] = 2;
+				else btnState[0] = 1;
+
+				if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+					btnAction[0] = true;
+					// TODO: Trigger the action corresponding to the clicked button
+					// For example, you can use 'i' to identify which button was clicked
+				}
+			}
+			else btnState[0] = 0;
+
+			if (btnAction[0])
+			{
+				// TODO: Any desired action
+			}
+
+			if (CheckCollisionPointRec(mousePoint, btnBounds[1]))
+			{
+				if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) btnState[1] = 2;
+				else btnState[1] = 1;
+
+				if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+					btnAction[1] = true;
+					// TODO: Trigger the action corresponding to the clicked button
+					// For example, you can use 'i' to identify which button was clicked
+				}
+			}
+			else btnState[1] = 0;
+
+			if (btnAction[1])
+			{
+				// TODO: Any desired action
+			}
+
+			if (CheckCollisionPointRec(mousePoint, btnBounds[2]))
+			{
+				if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) btnState[2] = 2;
+				else btnState[2] = 1;
+
+				if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+					btnAction[2] = true;
+					// TODO: Trigger the action corresponding to the clicked button
+					// For example, you can use 'i' to identify which button was clicked
+				}
+			}
+			else btnState[2] = 0;
+
+			if (btnAction[2])
+			{
+				// TODO: Any desired action
+			}
 		}
 
+
+		
 		EndDrawing();
 	}
 
 	CloseWindow();
 
-	for (int i = 0; i < metro_subway.size(); ++i) { subway_thread[i].join(); } // on attends que les threads aie tous terminés
+	for(int i = 0; i < metro_subway.size(); ++i) { subway_thread[i].join(); } // on attends que les threads aie tous terminés
 
-	for (int j = 0; j < metro_line.size(); j++) { cout << metro_line[j]->get_people_forward() << " : fw || " << metro_line[j]->get_people_return() << " : rtn" << endl;	} // debug
+	for(int j = 0; j < metro_line.size(); j++) { cout << metro_line[j]->get_people_forward() << " : fw || " << metro_line[j]->get_people_return() << " : rtn" << endl;	} // debug
 
 	// UNLOADING TEXTURES //
-	for (int i = 0; i < metro_line.size(); i++) { UnloadTexture(metro_line[i]->station_texture); }
 
+	UnloadTexture(stop_button);
+	UnloadTexture(background);
+	for (int i = 0; i < metro_line.size(); i++) { UnloadTexture(metro_line[i]->station_texture); }
 	for (int i = 0; i < metro_subway.size(); ++i) {	UnloadTexture(metro_subway[i]->sub_texture); }
 
 	return 0;
