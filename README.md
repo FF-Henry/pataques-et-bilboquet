@@ -2,8 +2,8 @@
 
 ## Lien vers la capsule 
 
+(pensez à mettre la vidéo en 720p pour une meilleur lisibilité)
 Gdrive : https://drive.google.com/file/d/1LSOYquiPjIQUcSNmkCfr8vhSLEjDEIB6/view?usp=sharing
-
 
 ## Description
 
