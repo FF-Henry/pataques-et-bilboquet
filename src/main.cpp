@@ -170,12 +170,12 @@ void Station::subway_entrance(Subway subway_in) {
 	if (subway_in.get_direction()) { // pour savoir le sens dans lequel on est (rappel : true = aller, false = retour)
 		set_sub_in_station_forward(subway_in); // on ajoute notre metro dans le bon sens de la station
 		sub_in_station_forward.set_station_id(this->id); // on recupère l'id de la station
-		cout << sub_in_station_forward.get_id() << " succesfully in " << name << " direction " << sub_in_station_forward.get_direction() << endl; // debug
+		//cout << sub_in_station_forward.get_id() << " succesfully in " << name << " direction " << sub_in_station_forward.get_direction() << endl; // debug
 	}
 	else {
 		set_sub_in_station_return(subway_in);
 		sub_in_station_return.set_station_id(this->id);
-		cout << sub_in_station_return.get_id() << " succesfully in " << name << " direction " << sub_in_station_return.get_direction() << endl; // debug
+		//cout << sub_in_station_return.get_id() << " succesfully in " << name << " direction " << sub_in_station_return.get_direction() << endl; // debug
 	}
 	people_offboarding(subway_in);
 	people_onboarding(subway_in);
@@ -184,11 +184,11 @@ void Station::subway_entrance(Subway subway_in) {
 Subway Station::subway_exit(Subway subway_in) {
 
 	if (subway_in.get_direction()) { // pour savoir lequel des metros il faut renvoyer en fonction du sens
-		cout << sub_in_station_forward.get_id() << " succesfully exit " << name << " direction " << sub_in_station_forward.get_direction() << endl; // debug
+		//cout << sub_in_station_forward.get_id() << " succesfully exit " << name << " direction " << sub_in_station_forward.get_direction() << endl; // debug
 		return sub_in_station_forward;
 	}
 	else {
-		cout << sub_in_station_return.get_id() << " succesfully exit " << name << " direction " << sub_in_station_return.get_direction() << endl; // debug
+		//cout << sub_in_station_return.get_id() << " succesfully exit " << name << " direction " << sub_in_station_return.get_direction() << endl; // debug
 		return sub_in_station_return;
 	}
 	set_is_subway(false); // on libère la station
@@ -203,8 +203,8 @@ void Station::people_offboarding(Subway subway_in) {
 		uniform_int_distribution<int> distribution(0, people_in_subway); // range du rand
 		int off = distribution(generator); // quantité aléatoire de personne qui sortent
 		//cout << "Tot in subway : " << people_in_subway << ", getting out : " << off << endl; // debug
-		for (int i = 1; i < off; i++) { 
-			this_thread::sleep_for(100ms); // on attends Xms pour simuler les personnes qui sortent (désactivé pour le déboggage) 
+		for (int i = 0; i < off; i++) { 
+			this_thread::sleep_for(70ms); // on attends Xms pour simuler les personnes qui sortent (désactivé pour le déboggage) 
 			if (subway_in.get_direction()) {
 				sub_in_station_forward.set_people(sub_in_station_forward.get_people() - 1);
 				// this->set_people_forward(this->get_people_forward() + off); // boucle de passager fermée, à commenter pour demande initiale
@@ -214,7 +214,7 @@ void Station::people_offboarding(Subway subway_in) {
 				// this->set_people_return(this->get_people_return() + off); // boucle de passager fermée, à commenter pour demande initiale
 			}
 		}
-		//cout << sub_in_station.get_people() << " people now in subway" << endl << endl;
+		//cout << sub_in_station.get_people() << " people now in subway" << endl << endl; // debug
 	}
 }
 
@@ -231,7 +231,7 @@ void Station::people_onboarding(Subway subway_in) {
 		int iter = distribution(generator); // quantité aléatoire de personne qui entrent
 		//cout << "Tot in station : " << people_in_station << ", space left : " << space_left << endl;
 		for (int i = 0; i < iter; i++) {
-			this_thread::sleep_for(100ms);  // on attends Xms pour simuler les personnes qui entrent (désactivé pour le déboggage) 
+			this_thread::sleep_for(70ms);  // on attends Xms pour simuler les personnes qui entrent (désactivé pour le déboggage) 
 			if (subway_in.get_direction()) {
 				this->set_people_forward(this->get_people_forward() - 1);
 				sub_in_station_forward.set_people(sub_in_station_forward.get_people() + 1); // on met a jour
@@ -275,7 +275,7 @@ void core_gameplay(vector<Station*> metro_line, vector<Subway*> metro_subway, in
 					metro_subway[sub_index]->move_to_station(metro_line[index]->station_location, *metro_subway[metro_subway.size() - 1]);
 				}
 
-				cout << metro_subway[sub_index]->get_id() << " in depot " << index << "\n"; // debug
+				//cout << metro_subway[sub_index]->get_id() << " in depot " << index << "\n"; // debug
 				metro_subway[sub_index]->reverse_direction();
 				start = true;
 			}
@@ -293,10 +293,10 @@ void core_gameplay(vector<Station*> metro_line, vector<Subway*> metro_subway, in
 				}
 				metro_line[index]->subway_entrance(*metro_subway[sub_index]);
 				*metro_subway[sub_index] = metro_line[index]->subway_exit(*metro_subway[sub_index]);
-				cout << "===============================================" << endl << endl; // debug
+				//cout << "===============================================" << endl << endl; // debug
 			}
 			if (i != 0 && i % ratio == 0 && next_id < metro_subway.size()) { // si la distance entre les lignes est bonne + on evite les out of range
-				cout << "A new metro just spawned ---------------------<" << endl; // debug
+				//cout << "A new metro just spawned ---------------------<" << endl; // debug
 				start_thread(next_id, metro_line, metro_subway, subway_thread, nb_fois);
 				next_id = 999;
 			}
@@ -328,9 +328,9 @@ int main() {
 	Station Depot2("Depot2", 0, 0, false, { 1500, 400 });
 
 	// déclaration des class metro //
-	Subway Metropolis(1, 10, 40, 0, 2, 1, true, 0);
-	Subway Metropompied(2, 10, 40, 0, 2, 1, true, 0);
-	Subway Metrambulance(3, 10, 40, 0, 2, 1, true, 0);
+	Subway Metropolis(1, 30, 40, 0, 3, 1, true, 0);
+	Subway Metropompied(2, 10, 40, 0, 3, 1, true, 0);
+	Subway Metrambulance(3, 20, 40, 0, 3, 1, true, 0);
 	//Subway Metronome(4, 10, 40, 0, 10, 3, true, 0);
 
 	vector<Station*> metro_line = { &Depot1, &Lille , &Berlin, &Moscou, &Depot2 }; // stations du metro
@@ -421,7 +421,7 @@ int main() {
 				" | Direction: " + (metro_subway_active[i]->get_direction() ? "Forward" : "Return") +
 				" | Station ID: " + to_string(metro_subway_active[i]->get_station_id()) +
 				" | Emergency_stop: " + (metro_subway_active[i]->emergency_stop ? "True" : "False");
-			DrawText(sub_info_prompt.c_str(), 50, 50 + i * 20, 20, BLACK);
+			DrawText(sub_info_prompt.c_str(), 50, 50 + i * 60, 20, BLACK);
 			DrawTextureRec(stop_button, sourceRec[i], Vector2{ 1000.0f, 42 + static_cast<float>(i) * 60.0f }, WHITE);
 		}
 
