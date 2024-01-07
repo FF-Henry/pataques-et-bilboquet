@@ -204,15 +204,15 @@ void Station::people_offboarding(Subway subway_in) {
 		int off = distribution(generator); // quantité aléatoire de personne qui sortent
 		//cout << "Tot in subway : " << people_in_subway << ", getting out : " << off << endl; // debug
 		for (int i = 1; i < off; i++) { 
-			this_thread::sleep_for(10ms); // on attends Xms pour simuler les personnes qui sortent (désactivé pour le déboggage) 
-		}
-		if (subway_in.get_direction()) {
-			sub_in_station_forward.set_people(people_in_subway - off);
-			// this->set_people_forward(this->get_people_forward() + off); // boucle de passager fermée, à commenter pour demande initiale
-		}
-		else {
-			sub_in_station_return.set_people(people_in_subway - off);
-			// this->set_people_return(this->get_people_return() + off); // boucle de passager fermée, à commenter pour demande initiale
+			this_thread::sleep_for(100ms); // on attends Xms pour simuler les personnes qui sortent (désactivé pour le déboggage) 
+			if (subway_in.get_direction()) {
+				sub_in_station_forward.set_people(sub_in_station_forward.get_people() - 1);
+				// this->set_people_forward(this->get_people_forward() + off); // boucle de passager fermée, à commenter pour demande initiale
+			}
+			else {
+				sub_in_station_return.set_people(sub_in_station_return.get_people() - 1);
+				// this->set_people_return(this->get_people_return() + off); // boucle de passager fermée, à commenter pour demande initiale
+			}
 		}
 		//cout << sub_in_station.get_people() << " people now in subway" << endl << endl;
 	}
@@ -231,17 +231,17 @@ void Station::people_onboarding(Subway subway_in) {
 		int iter = distribution(generator); // quantité aléatoire de personne qui entrent
 		//cout << "Tot in station : " << people_in_station << ", space left : " << space_left << endl;
 		for (int i = 0; i < iter; i++) {
-			this_thread::sleep_for(10ms);  // on attends Xms pour simuler les personnes qui entrent (désactivé pour le déboggage) 
+			this_thread::sleep_for(100ms);  // on attends Xms pour simuler les personnes qui entrent (désactivé pour le déboggage) 
+			if (subway_in.get_direction()) {
+				this->set_people_forward(this->get_people_forward() - 1);
+				sub_in_station_forward.set_people(sub_in_station_forward.get_people() + 1); // on met a jour
+			}
+			else {
+				this->set_people_return(this->get_people_return() - 1);
+				sub_in_station_return.set_people(sub_in_station_return.get_people() + 1); // on met a jour
+			}
 		}
 		//cout << "+" << iter << " in" << endl;
-		if (subway_in.get_direction()) {
-			this->set_people_forward(people_in_station - iter);
-			sub_in_station_forward.set_people(sub_in_station_forward.get_people() + iter); // on met a jour
-		}
-		else {
-			this->set_people_return(people_in_station - iter);
-			sub_in_station_return.set_people(sub_in_station_return.get_people() + iter); // on met a jour
-		}
 		//people_in_station = (subway_in.get_direction()) ? this->get_people_forward() : this->get_people_return();
 		//cout << "Tot in station : " << people_in_station << ", people now in subway : " << sub_in_station.get_people() << endl;
 	}
@@ -416,65 +416,64 @@ int main() {
 				" | People: " + to_string(metro_subway_active[i]->get_people()) +
 				" | Speed: " + to_string(metro_subway_active[i]->get_speed()) +
 				" | Direction: " + (metro_subway_active[i]->get_direction() ? "Forward" : "Return") +
-				" | Station ID: " + to_string(metro_subway_active[i]->get_station_id()) + 
+				" | Station ID: " + to_string(metro_subway_active[i]->get_station_id()) +
 				" | Emergency_stop: " + (metro_subway_active[i]->emergency_stop ? "True" : "False");
 			DrawText(sub_info_prompt.c_str(), 50, 50 + i * 20, 20, BLACK);
 			DrawTextureRec(stop_button, sourceRec[i], Vector2{ 1000.0f, 42 + static_cast<float>(i) * 60.0f }, WHITE);
-			
+		}
 
-			if (CheckCollisionPointRec(mousePoint, btnBounds[0]))
-			{
-				if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) btnState[0] = 2;
-				else btnState[0] = 1;
+		if (CheckCollisionPointRec(mousePoint, btnBounds[0]))
+		{
+			if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) btnState[0] = 2;
+			else btnState[0] = 1;
 
-				if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
-					btnAction[0] = true;
-					// TODO: Trigger the action corresponding to the clicked button
-					// For example, you can use 'i' to identify which button was clicked
-				}
+			if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+				btnAction[0] = true;
+				// TODO: Trigger the action corresponding to the clicked button
+				// For example, you can use 'i' to identify which button was clicked
 			}
-			else btnState[0] = 0;
+		}
+		else btnState[0] = 0;
 
-			if (btnAction[0])
-			{
-				metro_subway_active[0]->emergency_stop = !metro_subway_active[0]->emergency_stop;
+		if (btnAction[0])
+		{
+			metro_subway_active[0]->emergency_stop = !metro_subway_active[0]->emergency_stop;
+		}
+
+		if (CheckCollisionPointRec(mousePoint, btnBounds[1]))
+		{
+			if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) btnState[1] = 2;
+			else btnState[1] = 1;
+
+			if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+				btnAction[1] = true;
+				// TODO: Trigger the action corresponding to the clicked button
+				// For example, you can use 'i' to identify which button was clicked
 			}
+		}
+		else btnState[1] = 0;
 
-			if (CheckCollisionPointRec(mousePoint, btnBounds[1]))
-			{
-				if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) btnState[1] = 2;
-				else btnState[1] = 1;
+		if (btnAction[1])
+		{
+			metro_subway_active[1]->emergency_stop = !metro_subway_active[1]->emergency_stop;
+		}
 
-				if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
-					btnAction[1] = true;
-					// TODO: Trigger the action corresponding to the clicked button
-					// For example, you can use 'i' to identify which button was clicked
-				}
+		if (CheckCollisionPointRec(mousePoint, btnBounds[2]))
+		{
+			if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) btnState[2] = 2;
+			else btnState[2] = 1;
+
+			if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+				btnAction[2] = true;
+				// TODO: Trigger the action corresponding to the clicked button
+				// For example, you can use 'i' to identify which button was clicked
 			}
-			else btnState[1] = 0;
+		}
+		else btnState[2] = 0;
 
-			if (btnAction[1])
-			{
-				metro_subway_active[1]->emergency_stop = !metro_subway_active[1]->emergency_stop;
-			}
-
-			if (CheckCollisionPointRec(mousePoint, btnBounds[2]))
-			{
-				if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) btnState[2] = 2;
-				else btnState[2] = 1;
-
-				if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
-					btnAction[2] = true;
-					// TODO: Trigger the action corresponding to the clicked button
-					// For example, you can use 'i' to identify which button was clicked
-				}
-			}
-			else btnState[2] = 0;
-
-			if (btnAction[2])
-			{
-				metro_subway_active[2]->emergency_stop = !metro_subway_active[2]->emergency_stop;
-			}
+		if (btnAction[2])
+		{
+			metro_subway_active[2]->emergency_stop = !metro_subway_active[2]->emergency_stop;
 		}
 
 		EndDrawing();
