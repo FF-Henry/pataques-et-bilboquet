@@ -76,7 +76,8 @@ void Subway::move_to_station(Vector2 target_position, Subway& previous_subway) {
 	int distance = static_cast<int>(target_position.x) - static_cast<int>(this->coordinates.x);
 	int distance_to_previous = abs(previous_subway.coordinates.x - this->coordinates.x);
 
-	bool delay = true;
+	int delayer = 1;
+	int delay_ratio = 8;
 	
 	while (abs(distance) > 0) {
 
@@ -99,17 +100,20 @@ void Subway::move_to_station(Vector2 target_position, Subway& previous_subway) {
 				// Arrêt progressif en fonction de la proximité avec le métro précédent
 				float brake_factor = distance_to_previous / safe_distance;
 				this->set_speed(ceil((float)this->get_speed() * (float)brake_factor));
+				//if (delayer) this->set_speed(this->get_speed() - this->get_acceleration()); // mettre les deux lignes du dessus en commentaires et dé-commentez celle là pour un maximum de fun. (Prérequis : stopper le métro 1 juste avant le dépot 2, marche mieux avec 3 métros) 
 			}
 			else {
-				if (abs(distance) < this->get_speed()) {
-					this->set_speed(this->get_speed() - this->get_acceleration());
+				if (abs(distance) < this->get_speed() * delay_ratio) {
+					if(delayer) this->set_speed(this->get_speed() - this->get_acceleration());
 				}
 				else {
-					this->set_speed(this->get_speed() + this->get_acceleration());
+					if(delayer == delay_ratio) this->set_speed(this->get_speed() + this->get_acceleration());
 					if (this->get_speed() > this->get_max_speed()) {
 						this->set_speed(this->get_max_speed());
 					}
 				}
+				delayer++;
+				if (delayer > delay_ratio) delayer = 1;
 			}
 			if (this->get_direction()) {
 				coordinates.y = 400;
@@ -328,9 +332,9 @@ int main() {
 	Station Depot2("Depot2", 0, 0, false, { 1500, 400 });
 
 	// déclaration des class metro //
-	Subway Metropolis(1, 30, 40, 0, 3, 1, true, 0);
-	Subway Metropompied(2, 10, 40, 0, 3, 1, true, 0);
-	Subway Metrambulance(3, 20, 40, 0, 3, 1, true, 0);
+	Subway Metropolis(1, 30, 40, 0, 5, 1, true, 0);
+	Subway Metropompied(2, 10, 40, 0, 5, 1, true, 0);
+	Subway Metrambulance(3, 20, 40, 0, 5, 1, true, 0);
 	//Subway Metronome(4, 10, 40, 0, 10, 3, true, 0);
 
 	vector<Station*> metro_line = { &Depot1, &Lille , &Berlin, &Moscou, &Depot2 }; // stations du metro
